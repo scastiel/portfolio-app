@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:portfolio/chart.dart';
 
 void main() {
   runApp(PortfolioApp());
@@ -108,31 +109,28 @@ class Summary extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(8.0, 16.0, 8.0, 8.0),
       child: Card(
         elevation: 3.0,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 16.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Total value'),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
-                    child: Text(
-                      '${totalValue.toStringAsFixed(2)} CAD',
-                      style: Theme.of(context).textTheme.headline6,
-                    ),
-                  ),
-                ],
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [Text('Total value'), VariationText(variation)],
               ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [VariationText(variation)],
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Text(
+                '${totalValue.toStringAsFixed(2)} CAD',
+                style: Theme.of(context).textTheme.headline6,
               ),
-            ],
-          ),
+            ),
+            Container(
+              child: PriceChart.withSampleData(end: totalValue),
+              height: 50,
+            )
+          ],
         ),
       ),
     );
