@@ -76,10 +76,83 @@ class Dashboard extends StatelessWidget {
         .toList();
     return ListView(
       children: [
+        Summary(
+          portfolio: portfolio,
+        ),
         AssetTable(
           assetsWithPrices: assetsWithPrices,
         )
       ],
+    );
+  }
+}
+
+class Summary extends StatelessWidget {
+  final Portfolio portfolio;
+
+  Summary({@required this.portfolio});
+
+  @override
+  Widget build(BuildContext context) {
+    final totalValue = portfolio.assets.fold<double>(0.0,
+        (value, asset) => value + asset.amount * prices[asset.currency.id].cad);
+    final variation = portfolio.assets.fold<double>(
+        0.0,
+        (value, asset) =>
+            value +
+            prices[asset.currency.id].variation *
+                asset.amount *
+                prices[asset.currency.id].cad /
+                totalValue);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8.0, 16.0, 8.0, 8.0),
+      child: Card(
+        elevation: 3.0,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 16.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Total value'),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: Text(
+                      '${totalValue.toStringAsFixed(2)} CAD',
+                      style: Theme.of(context).textTheme.headline6,
+                    ),
+                  ),
+                ],
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [VariationText(variation)],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class VariationText extends StatelessWidget {
+  final double variation;
+  final double fontSize;
+
+  VariationText(this.variation, {this.fontSize});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      '${variation >= 0 ? '+' : ''}${variation.toStringAsFixed(2)}% ${variation >= 0 ? '▲' : '▼'}',
+      style: TextStyle(
+        fontSize: fontSize,
+        color: variation >= 0 ? Colors.green : Colors.red,
+      ),
     );
   }
 }
@@ -140,13 +213,7 @@ class AssetTable extends StatelessWidget {
               '${asset.price.usd.toStringAsFixed(2)} USD',
               style: Theme.of(context).textTheme.bodyText1,
             ),
-            Text(
-              '${asset.price.variation}% ${asset.price.variation >= 0 ? '▲' : '▼'}',
-              style: TextStyle(
-                fontSize: 11,
-                color: asset.price.variation >= 0 ? Colors.green : Colors.red,
-              ),
-            ),
+            VariationText(asset.price.variation, fontSize: 11),
           ],
         ),
       ),
@@ -195,59 +262,6 @@ class AssetTable extends StatelessWidget {
               .toList()
         ],
       ),
-    );
-  }
-}
-
-class AssetList extends StatelessWidget {
-  final List<AssetWithPrice> assetsWithPrices;
-
-  AssetList({@required this.assetsWithPrices});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 8),
-      child: ListView.builder(
-        itemCount: assetsWithPrices.length * 2,
-        itemBuilder: (_, i) {
-          if (i.isOdd) return Divider();
-          final assetWithPrice = assetsWithPrices[i ~/ 2];
-          return ListTile(
-            title: AssetListItem(assetWithPrice: assetWithPrice),
-          );
-        },
-      ),
-    );
-  }
-}
-
-class AssetListItem extends StatelessWidget {
-  final AssetWithPrice assetWithPrice;
-
-  AssetListItem({@required this.assetWithPrice});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(assetWithPrice.asset.currency.name),
-            Text('${assetWithPrice.price.usd.toString()} USD'),
-          ],
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              '${assetWithPrice.asset.amount.toString()} ${assetWithPrice.asset.currency.symbol} = ${(assetWithPrice.asset.amount * assetWithPrice.price.cad).toString()} CAD',
-            ),
-            Text('+1.2%'),
-          ],
-        ),
-      ],
     );
   }
 }
