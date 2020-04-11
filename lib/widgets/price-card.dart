@@ -38,11 +38,13 @@ class PriceCardState extends State<PriceCard> {
   final String holdingText;
 
   bool _isExpanded;
+  bool _animating;
 
   @override
   initState() {
     super.initState();
     _isExpanded = false;
+    _animating = false;
   }
 
   PriceCardState({
@@ -56,6 +58,7 @@ class PriceCardState extends State<PriceCard> {
   void onTap() {
     setState(() {
       _isExpanded = !_isExpanded;
+      _animating = true;
     });
   }
 
@@ -71,11 +74,8 @@ class PriceCardState extends State<PriceCard> {
 
   _buildDetailedChart() {
     return Container(
-      child: Padding(
-        padding: const EdgeInsets.only(top: 32.0),
-        child: PriceChart(end: end, detailed: true),
-      ),
-      height: 223,
+      child: PriceChart(end: end, detailed: true),
+      height: 215,
     );
   }
 
@@ -85,38 +85,58 @@ class PriceCardState extends State<PriceCard> {
       padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 0.0),
       child: Card(
         elevation: 3.0,
-        child: Container(
+        child: AnimatedContainer(
           height: _isExpanded ? 280 : 98,
+          duration: Duration(milliseconds: 200),
+          onEnd: () {
+            setState(() {
+              _animating = false;
+            });
+          },
           child: ClipRRect(
             borderRadius: BorderRadius.all(Radius.circular(5)),
             child: InkWell(
-              onTap: onTap,
+              onTap: _isExpanded ? null : onTap,
               child: Stack(
                 children: [
-                  ...(_isExpanded ? [] : [_buildBackgroundChart()]),
+                  ...((!_isExpanded && !_animating)
+                      ? [_buildBackgroundChart()]
+                      : []),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [title, VariationText(variation)],
+                      InkWell(
+                        onTap: _isExpanded ? onTap : null,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [title, VariationText(variation)],
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                  left: 8.0, right: 8.0, bottom: 8.0),
+                              child: Text(
+                                priceText,
+                                style: Theme.of(context).textTheme.headline6,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: Text(
-                          priceText,
-                          style: Theme.of(context).textTheme.headline6,
-                        ),
-                      ),
-                      ...(_isExpanded ? [_buildDetailedChart()] : []),
-                      ...(!_isExpanded && holdingText != null
+                      ...(_isExpanded && !_animating
+                          ? [_buildDetailedChart()]
+                          : []),
+                      ...(!_isExpanded && !_animating && holdingText != null
                           ? [
                               Padding(
                                 padding:
-                                    const EdgeInsets.only(left: 8.0, top: 20),
+                                    const EdgeInsets.only(left: 8.0, top: 14),
                                 child: Text(
                                   holdingText,
                                   style: Theme.of(context)
