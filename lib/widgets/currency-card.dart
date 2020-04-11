@@ -5,7 +5,6 @@ import '../model/currencies.dart';
 import '../model/prices.dart';
 import '../model/user-preferences.dart';
 import 'price-card.dart';
-import 'price-chart.dart';
 
 class CurrencyCard extends StatelessWidget {
   final Asset asset;
@@ -31,7 +30,7 @@ class CurrencyCard extends StatelessWidget {
       title: Text(asset.currency.name),
       variation: price.variation,
       priceText: '${priceFiat.toStringAsFixed(2)} ${pricesFiat.symbol}',
-      chart: PriceChart(end: priceFiat),
+      end: priceFiat,
       holdingText:
           'Holding: ${holdingValueFiat.toStringAsFixed(2)} ${holdingsFiat.symbol} (${asset.amount.toString()} ${asset.currency.symbol})',
     );
