@@ -11,9 +11,7 @@ class PriceChart extends StatelessWidget {
 
   /// Creates a [TimeSeriesChart] with sample data and no transition.
   factory PriceChart.withSampleData({@required double end}) {
-    return new PriceChart(
-      _createSampleData(end: end),
-    );
+    return new PriceChart(_createSampleData(end: end), animate: false);
   }
 
   @override
