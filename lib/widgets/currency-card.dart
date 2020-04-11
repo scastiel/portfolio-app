@@ -31,7 +31,7 @@ class CurrencyCard extends StatelessWidget {
       title: Text(asset.currency.name),
       variation: price.variation,
       priceText: '${priceFiat.toStringAsFixed(2)} ${pricesFiat.symbol}',
-      chart: PriceChart.withSampleData(end: priceFiat),
+      chart: PriceChart(end: priceFiat),
       holdingText:
           'Holding: ${holdingValueFiat.toStringAsFixed(2)} ${holdingsFiat.symbol} (${asset.amount.toString()} ${asset.currency.symbol})',
     );

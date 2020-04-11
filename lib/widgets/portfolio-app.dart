@@ -24,6 +24,8 @@ class PortfolioApp extends StatelessWidget {
     );
     return MaterialApp(
       title: 'Portfolio',
+      theme: ThemeData.light(),
+      darkTheme: ThemeData.dark(),
       home: Scaffold(
         body: Dashboard(
           portfolio: portfolio,

@@ -43,7 +43,7 @@ class Summary extends StatelessWidget {
       title: Text('Total value'),
       variation: variation,
       priceText: '${totalValue.toStringAsFixed(2)} ${holdingsFiat.symbol}',
-      chart: PriceChart.withSampleData(end: totalValue),
+      chart: PriceChart(end: totalValue),
     );
   }
 }
