@@ -7,9 +7,8 @@ class PriceChart extends StatelessWidget {
   final List<charts.Series<TimeSeriesPrice, DateTime>> seriesList;
   final bool animate;
 
-  PriceChart(this.seriesList, {this.animate});
+  const PriceChart(this.seriesList, {this.animate});
 
-  /// Creates a [TimeSeriesChart] with sample data and no transition.
   factory PriceChart.withSampleData({@required double end}) {
     return new PriceChart(_createSampleData(end: end), animate: false);
   }
