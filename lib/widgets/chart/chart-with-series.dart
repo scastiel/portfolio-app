@@ -81,7 +81,7 @@ class ChartWithSeries extends StatelessWidget {
                 minimumPaddingBetweenLabelsPx: 5,
               )
             : new charts.NoneRenderSpec(),
-        viewport: detailed ? null : viewport,
+        viewport: viewport,
       ),
       domainAxis: new charts.DateTimeAxisSpec(
         showAxisLine: false,

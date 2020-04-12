@@ -9,12 +9,14 @@ import 'price-card.dart';
 class CurrencyCard extends StatelessWidget {
   final Asset asset;
   final Price price;
+  final Map<DateTime, double> history;
   final UserPreferences userPreferences;
   final Currencies fiats;
 
   const CurrencyCard({
     @required this.asset,
     @required this.price,
+    @required this.history,
     @required this.userPreferences,
     @required this.fiats,
   });
@@ -29,10 +31,12 @@ class CurrencyCard extends StatelessWidget {
     final holdingsFiat = fiats.getCurrency(userPreferences.holdingsFiatId);
     return PriceCard(
       title: Text(asset.currency.name),
+      currency: asset.currency,
+      fiat: fiats.getCurrency(userPreferences.pricesFiatId),
       variation: price?.variation,
       priceText:
           '${priceFiat != null ? priceFiat.toStringAsFixed(2) : '-'} ${pricesFiat.symbol}',
-      end: priceFiat,
+      history: history,
       holdingText:
           'Holding: ${holdingValueFiat != null ? holdingValueFiat.toStringAsFixed(2) : '-'} ${holdingsFiat.symbol} (${asset.amount.toString()} ${asset.currency.symbol})',
     );

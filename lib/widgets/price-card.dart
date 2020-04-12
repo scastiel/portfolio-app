@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../model/currencies.dart';
 import 'chart/price-chart.dart';
 import 'variation-text.dart';
 
@@ -7,14 +8,18 @@ class PriceCard extends StatefulWidget {
   final Widget title;
   final double variation;
   final String priceText;
-  final double end;
+  final Map<DateTime, double> history;
   final String holdingText;
+  final Currency currency;
+  final Currency fiat;
 
   const PriceCard({
     @required this.title,
     @required this.variation,
     @required this.priceText,
-    @required this.end,
+    @required this.history,
+    this.currency,
+    @required this.fiat,
     this.holdingText,
   });
 
@@ -43,20 +48,29 @@ class PriceCardState extends State<PriceCard> {
   }
 
   _buildBackgroundChart() {
-    if (widget.end == null) return Text('');
+    if (widget.history == null) return Text('');
     return Container(
       child: Padding(
         padding: const EdgeInsets.only(top: 32.0),
-        child: PriceChart(end: widget.end),
+        child: PriceChart(
+          history: widget.history,
+          currency: widget.currency,
+          fiat: widget.fiat,
+        ),
       ),
       height: 98,
     );
   }
 
   _buildDetailedChart() {
-    if (widget.end == null) return Text('');
+    if (widget.history == null) return Text('');
     return Container(
-      child: PriceChart(end: widget.end, detailed: true),
+      child: PriceChart(
+        history: widget.history,
+        detailed: true,
+        currency: widget.currency,
+        fiat: widget.fiat,
+      ),
       height: 215,
     );
   }

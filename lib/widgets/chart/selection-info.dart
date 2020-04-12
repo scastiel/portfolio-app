@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../model/currencies.dart';
 import 'time-series-price.dart';
 
 class SelectionInfo extends StatelessWidget {
   final TimeSeriesPrice timeSeriesPrice;
+  final Currency currency;
+  final Currency fiat;
 
   const SelectionInfo({
     Key key,
+    @required this.currency,
+    @required this.fiat,
     this.timeSeriesPrice,
   }) : super(key: key);
 
@@ -34,7 +39,7 @@ class SelectionInfo extends StatelessWidget {
                 style: TextStyle(fontSize: 10),
               ),
               Text(
-                timeSeriesPrice.price.toStringAsFixed(2),
+                '${timeSeriesPrice.price.toStringAsFixed(2)} ${fiat.symbol}',
                 style: TextStyle(fontSize: 14),
               ),
             ],

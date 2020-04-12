@@ -14,8 +14,8 @@ class PortfolioApp extends StatelessWidget {
     final currencies = Currencies.withFixtureData();
     final fiats = Currencies.withFiatFixtureData();
     final portfolio = Portfolio(assets: [
-      Asset(currency: currencies.getCurrency('btc'), amount: 5.4),
-      Asset(currency: currencies.getCurrency('eth'), amount: 32.9),
+      Asset(currency: currencies.getCurrency('btc'), amount: 0.39112364),
+      Asset(currency: currencies.getCurrency('eth'), amount: 12.9542),
     ]);
     final userPreferences = UserPreferences(
       pricesFiatId: 'usd',
@@ -30,6 +30,7 @@ class PortfolioApp extends StatelessWidget {
           portfolio: portfolio,
           userPreferences: userPreferences,
           fiats: fiats,
+          currencies: currencies,
           pricesFetcher: CoinGeckoPricesFetcher.forPortfolio(
             portfolio: portfolio,
             userPreferences: userPreferences,

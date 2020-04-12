@@ -26,15 +26,42 @@ class AssetCard extends StatefulWidget {
 
 class _AssetCardState extends State<AssetCard> {
   Price _price;
+  Map<DateTime, double> _history;
+  void Function() _unsubscribeFromCurrency;
+  void Function() _unsubscribeFromHistoryForCurrency;
 
   @override
   void initState() {
     super.initState();
-    widget.pricesFetcher.subscribeForCurrency(widget.asset.currency, (price) {
-      setState(() {
-        _price = price;
-      });
-    });
+    _unsubscribeFromCurrency = widget.pricesFetcher.subscribeForCurrency(
+      widget.asset.currency,
+      (price) {
+        setState(() {
+          _price = price;
+        });
+      },
+    );
+    _unsubscribeFromHistoryForCurrency =
+        widget.pricesFetcher.subscribeToHistoryForCurrency(
+      widget.asset.currency.id,
+      widget.userPreferences.pricesFiatId,
+      (history) {
+        setState(() {
+          _history = history;
+        });
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    if (_unsubscribeFromHistoryForCurrency != null) {
+      _unsubscribeFromHistoryForCurrency();
+    }
+    if (_unsubscribeFromCurrency != null) {
+      _unsubscribeFromCurrency();
+    }
+    super.dispose();
   }
 
   @override
@@ -42,6 +69,7 @@ class _AssetCardState extends State<AssetCard> {
     return CurrencyCard(
       asset: widget.asset,
       price: _price,
+      history: _history,
       userPreferences: widget.userPreferences,
       fiats: widget.fiats,
     );

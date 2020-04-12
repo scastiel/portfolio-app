@@ -11,12 +11,14 @@ import 'summary-card.dart';
 class Dashboard extends StatelessWidget {
   final Portfolio portfolio;
   final UserPreferences userPreferences;
+  final Currencies currencies;
   final Currencies fiats;
   final PricesFetcher pricesFetcher;
 
   const Dashboard({
     @required this.portfolio,
     @required this.userPreferences,
+    @required this.currencies,
     @required this.fiats,
     @required this.pricesFetcher,
   });
@@ -40,6 +42,7 @@ class Dashboard extends StatelessWidget {
               Summary(
                 portfolio: portfolio,
                 userPreferences: userPreferences,
+                currencies: currencies,
                 fiats: fiats,
                 pricesFetcher: pricesFetcher,
               ),

@@ -1,17 +1,18 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:portfolio/model/currencies.dart';
 import 'package:portfolio/model/portfolio.dart';
 import 'package:portfolio/model/user-preferences.dart';
 
-import 'fixtures.dart';
 import 'model/price.dart';
 
 abstract class PricesFetcher {
-  subscribeForCurrency(Currency currency, void Function(Price) onUpdate);
+  void Function() subscribeForCurrency(
+      Currency currency, void Function(Price) onUpdate);
+  void Function() subscribeToHistoryForCurrency(String currencyId,
+      String fiatId, void Function(Map<DateTime, double>) onUpdate);
   Future<void> refresh();
 }
 
@@ -24,6 +25,7 @@ class CoinGeckoPricesFetcher extends PricesFetcher {
   final Map<String, Price> _prices = {};
   bool _isListening = false;
   Map<String, Set<Function(Price)>> _observers = {};
+  Set<_HistoryObserver> _historyObservers = {};
 
   CoinGeckoPricesFetcher({@required this.currencyIds, @required this.fiatIds});
 
@@ -48,10 +50,7 @@ class CoinGeckoPricesFetcher extends PricesFetcher {
       'vs_currencies': fiatIds.join(','),
       'include_24hr_change': 'true'
     });
-    final request = await HttpClient().getUrl(uri);
-    final response = await request.close();
-    final json = await response.transform(Utf8Decoder()).first;
-    final result = JsonCodec().decode(json);
+    final result = await _callApi(uri);
     currencyIds.forEach(
       (currencyId) {
         final apiCurrencyId = currenciesMapping[currencyId];
@@ -71,9 +70,54 @@ class CoinGeckoPricesFetcher extends PricesFetcher {
     _notifyObservers();
   }
 
+  Future<void> _fetchHistoryForCurrencyAndFiat(
+    String currencyId,
+    String fiatId,
+  ) async {
+    final apiCurrencyId = currenciesMapping[currencyId];
+    final uri = Uri.https(
+      'api.coingecko.com',
+      '/api/v3/coins/$apiCurrencyId/market_chart',
+      {'vs_currency': fiatId, 'days': '1'},
+    );
+    final result = await _callApi(uri);
+    final history = result['prices'].fold(
+      <DateTime, double>{},
+      (history, values) => <DateTime, double>{
+        ...history,
+        DateTime.fromMillisecondsSinceEpoch(values[0]): values[1]
+      },
+    );
+    _historyObservers.forEach((observer) {
+      if (observer.currencyId == currencyId && observer.fiatId == fiatId) {
+        observer.onUpdate(history);
+      }
+    });
+  }
+
+  Future _callApi(Uri uri) async {
+    final request = await HttpClient().getUrl(uri);
+    final response = await request.close();
+    var json = '';
+    await for (final chunk in response.transform(Utf8Decoder())) {
+      json += chunk;
+    }
+    final result = JsonCodec().decode(json);
+    return result;
+  }
+
+  void _fetchHistory() {
+    for (final currencyId in currencyIds) {
+      for (final fiatId in fiatIds) {
+        _fetchHistoryForCurrencyAndFiat(currencyId, fiatId);
+      }
+    }
+  }
+
   _startListening() {
     _isListening = true;
     _fetchPrices();
+    _fetchHistory();
   }
 
   _notifyObservers() {
@@ -96,42 +140,53 @@ class CoinGeckoPricesFetcher extends PricesFetcher {
     _observers[currencyId].add(callback);
   }
 
+  _removeObserver(String currencyId, Function(Price) callback) {
+    if (_observers.containsKey(currencyId)) {
+      _observers[currencyId].remove(callback);
+    }
+  }
+
   subscribeForCurrency(Currency currency, void Function(Price) onUpdate) {
     if (!_isListening) {
       _startListening();
     }
     _addObserver(currency.id, onUpdate);
+    return () => _removeObserver(currency.id, onUpdate);
   }
 
   @override
   Future<void> refresh() async {
     await _fetchPrices();
-  }
-}
-
-class MockPricesFetcher extends PricesFetcher {
-  final Map<String, Price> _prices = {};
-  static final random = Random();
-
-  subscribeForCurrency(Currency currency, void Function(Price) onUpdate) {
-    void _updatePrice() {
-      if (_prices[currency.id] == null) {
-        _prices[currency.id] = prices[currency.id];
-      } else {
-        final factor = (1 + 0.0001 * (random.nextDouble() - 0.5));
-        _prices[currency.id] = Price(fiatPrices: {
-          'usd': _prices[currency.id].fiatPrices['usd'] * factor,
-          'cad': _prices[currency.id].fiatPrices['cad'] * factor
-        }, variation: _prices[currency.id].variation * factor);
-      }
-      Future.delayed(Duration(milliseconds: 300))
-          .then((_) => onUpdate(_prices[currency.id]));
-      Future.delayed(Duration(seconds: 5)).then((_) => _updatePrice());
-    }
-
-    _updatePrice();
+    _fetchHistory();
   }
 
   @override
-  Future<void> refresh() async {}
+  void Function() subscribeToHistoryForCurrency(
+    String currencyId,
+    String fiatId,
+    void Function(Map<DateTime, double>) onUpdate,
+  ) {
+    final observer = _HistoryObserver(
+      currencyId: currencyId,
+      fiatId: fiatId,
+      onUpdate: onUpdate,
+    );
+    _historyObservers.add(observer);
+    if (!_isListening) {
+      _startListening();
+    }
+    return () => _historyObservers.remove(observer);
+  }
+}
+
+class _HistoryObserver {
+  final String currencyId;
+  final String fiatId;
+  final void Function(Map<DateTime, double>) onUpdate;
+
+  _HistoryObserver({
+    @required this.currencyId,
+    @required this.fiatId,
+    @required this.onUpdate,
+  });
 }
