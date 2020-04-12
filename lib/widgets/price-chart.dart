@@ -65,14 +65,14 @@ class PriceChart extends StatefulWidget {
   }
 }
 
-class PriceChartState extends State<PriceChart> {
+class PriceChartState extends State<PriceChart> with WidgetsBindingObserver {
   static const secondaryMeasureAxisId = 'secondaryMeasureAxisId';
 
   final List<double> values;
   final List<charts.Series<TimeSeriesPrice, DateTime>> seriesList;
   final bool detailed;
-  TimeSeriesPrice _selectedTimeSeriesPrice;
 
+  TimeSeriesPrice _selectedTimeSeriesPrice;
   charts.TimeSeriesChart _chart;
 
   PriceChartState({
@@ -80,6 +80,28 @@ class PriceChartState extends State<PriceChart> {
     @required this.seriesList,
     @required this.detailed,
   });
+
+  @override
+  initState() {
+    super.initState();
+    _chart = null;
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  didChangePlatformBrightness() {
+    Future.delayed(Duration(milliseconds: 300)).then((_) {
+      setState(() {
+        _chart = null;
+      });
+    });
+  }
+
+  @override
+  dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
 
   _buildChart(context) {
     if (_chart == null) {
