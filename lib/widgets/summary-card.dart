@@ -5,7 +5,6 @@ import '../model/portfolio.dart';
 import '../model/prices.dart';
 import '../model/user-preferences.dart';
 import 'price-card.dart';
-import 'price-chart.dart';
 
 class Summary extends StatelessWidget {
   final Portfolio portfolio;

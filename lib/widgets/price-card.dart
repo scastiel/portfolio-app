@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'price-chart.dart';
+import 'chart/price-chart.dart';
 import 'variation-text.dart';
 
 class PriceCard extends StatefulWidget {
