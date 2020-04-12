@@ -11,11 +11,13 @@ class Summary extends StatefulWidget {
   final Portfolio portfolio;
   final UserPreferences userPreferences;
   final Currencies fiats;
+  final PricesFetcher pricesFetcher;
 
   const Summary({
     @required this.portfolio,
     @required this.userPreferences,
     @required this.fiats,
+    @required this.pricesFetcher,
   });
 
   @override
@@ -24,13 +26,12 @@ class Summary extends StatefulWidget {
 
 class _SummaryState extends State<Summary> {
   Map<String, Price> _prices = {};
-  static final priceFetcher = PricesFetcher();
 
   @override
   void initState() {
     super.initState();
     widget.portfolio.assets.forEach((asset) {
-      priceFetcher.subscribeForCurrency(asset.currency, (price) {
+      widget.pricesFetcher.subscribeForCurrency(asset.currency, (price) {
         setState(() {
           _prices[asset.currency.id] = price;
         });

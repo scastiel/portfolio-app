@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:portfolio/prices-fetcher.dart';
 
 import '../model/currencies.dart';
 import '../model/portfolio.dart';
-import '../model/price.dart';
 import '../model/user-preferences.dart';
 import 'dashbboard.dart';
 
@@ -30,6 +30,10 @@ class PortfolioApp extends StatelessWidget {
           portfolio: portfolio,
           userPreferences: userPreferences,
           fiats: fiats,
+          pricesFetcher: CoinGeckoPricesFetcher.forPortfolio(
+            portfolio: portfolio,
+            userPreferences: userPreferences,
+          ),
         ),
       ),
     );

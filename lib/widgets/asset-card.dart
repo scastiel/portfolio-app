@@ -11,11 +11,13 @@ class AssetCard extends StatefulWidget {
   final Asset asset;
   final UserPreferences userPreferences;
   final Currencies fiats;
+  final PricesFetcher pricesFetcher;
 
   const AssetCard({
     @required this.asset,
     @required this.userPreferences,
     @required this.fiats,
+    @required this.pricesFetcher,
   });
 
   @override
@@ -24,12 +26,11 @@ class AssetCard extends StatefulWidget {
 
 class _AssetCardState extends State<AssetCard> {
   Price _price;
-  static final priceFetcher = PricesFetcher();
 
   @override
   void initState() {
     super.initState();
-    priceFetcher.subscribeForCurrency(widget.asset.currency, (price) {
+    widget.pricesFetcher.subscribeForCurrency(widget.asset.currency, (price) {
       setState(() {
         _price = price;
       });
