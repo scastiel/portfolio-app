@@ -20,23 +20,11 @@ class PriceCard extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() {
-    return PriceCardState(
-      title: title,
-      variation: variation,
-      priceText: priceText,
-      end: end,
-      holdingText: holdingText,
-    );
+    return PriceCardState();
   }
 }
 
 class PriceCardState extends State<PriceCard> {
-  final Widget title;
-  final double variation;
-  final String priceText;
-  final double end;
-  final String holdingText;
-
   bool _isExpanded;
   bool _animating;
 
@@ -47,14 +35,6 @@ class PriceCardState extends State<PriceCard> {
     _animating = false;
   }
 
-  PriceCardState({
-    @required this.title,
-    @required this.variation,
-    @required this.priceText,
-    @required this.end,
-    this.holdingText,
-  });
-
   void onTap() {
     setState(() {
       _isExpanded = !_isExpanded;
@@ -63,18 +43,20 @@ class PriceCardState extends State<PriceCard> {
   }
 
   _buildBackgroundChart() {
+    if (widget.end == null) return Text('');
     return Container(
       child: Padding(
         padding: const EdgeInsets.only(top: 32.0),
-        child: PriceChart(end: end),
+        child: PriceChart(end: widget.end),
       ),
       height: 98,
     );
   }
 
   _buildDetailedChart() {
+    if (widget.end == null) return Text('');
     return Container(
-      child: PriceChart(end: end, detailed: true),
+      child: PriceChart(end: widget.end, detailed: true),
       height: 215,
     );
   }
@@ -115,14 +97,17 @@ class PriceCardState extends State<PriceCard> {
                               child: Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
-                                children: [title, VariationText(variation)],
+                                children: [
+                                  widget.title,
+                                  VariationText(widget.variation)
+                                ],
                               ),
                             ),
                             Padding(
                               padding: const EdgeInsets.only(
                                   left: 8.0, right: 8.0, bottom: 8.0),
                               child: Text(
-                                priceText,
+                                widget.priceText,
                                 style: Theme.of(context).textTheme.headline6,
                               ),
                             ),
@@ -132,13 +117,15 @@ class PriceCardState extends State<PriceCard> {
                       ...(_isExpanded && !_animating
                           ? [_buildDetailedChart()]
                           : []),
-                      ...(!_isExpanded && !_animating && holdingText != null
+                      ...(!_isExpanded &&
+                              !_animating &&
+                              widget.holdingText != null
                           ? [
                               Padding(
                                 padding:
                                     const EdgeInsets.only(left: 8.0, top: 14),
                                 child: Text(
-                                  holdingText,
+                                  widget.holdingText,
                                   style: Theme.of(context)
                                       .textTheme
                                       .bodyText2

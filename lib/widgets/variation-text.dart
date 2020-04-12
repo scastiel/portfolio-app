@@ -8,12 +8,14 @@ class VariationText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      '${variation >= 0 ? '+' : ''}${variation.toStringAsFixed(2)}% ${variation >= 0 ? '▲' : '▼'}',
-      style: TextStyle(
-        fontSize: fontSize,
-        color: variation >= 0 ? Colors.green : Colors.red,
-      ),
-    );
+    return variation != null
+        ? Text(
+            '${variation >= 0 ? '+' : ''}${variation.toStringAsFixed(2)}% ${variation >= 0 ? '▲' : '▼'}',
+            style: TextStyle(
+              fontSize: fontSize,
+              color: variation >= 0 ? Colors.green : Colors.red,
+            ),
+          )
+        : Text('');
   }
 }

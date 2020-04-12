@@ -1,5 +1,5 @@
 import 'model/currencies.dart';
-import 'model/prices.dart';
+import 'model/price.dart';
 
 const currencies = {
   'btc': Currency(id: 'btc', name: 'Bitcoin', symbol: 'BTC'),

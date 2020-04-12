@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../model/currencies.dart';
 import '../model/portfolio.dart';
-import '../model/prices.dart';
+import '../model/price.dart';
 import '../model/user-preferences.dart';
 import 'dashbboard.dart';
 
@@ -11,7 +11,6 @@ class PortfolioApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final prices = Prices.withFixtureData();
     final currencies = Currencies.withFixtureData();
     final fiats = Currencies.withFiatFixtureData();
     final portfolio = Portfolio(assets: [
@@ -29,7 +28,6 @@ class PortfolioApp extends StatelessWidget {
       home: Scaffold(
         body: Dashboard(
           portfolio: portfolio,
-          prices: prices,
           userPreferences: userPreferences,
           fiats: fiats,
         ),

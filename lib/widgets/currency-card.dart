@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../model/portfolio.dart';
 import '../model/currencies.dart';
-import '../model/prices.dart';
+import '../model/price.dart';
 import '../model/user-preferences.dart';
 import 'price-card.dart';
 
@@ -21,18 +21,20 @@ class CurrencyCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final priceFiat = price.getInFiat(userPreferences.pricesFiatId);
-    final holdingValueFiat =
-        asset.amount * price.getInFiat(userPreferences.holdingsFiatId);
+    final priceFiat = price?.getInFiat(userPreferences.pricesFiatId);
+    final holdingValueFiat = price != null
+        ? asset.amount * price.getInFiat(userPreferences.holdingsFiatId)
+        : null;
     final pricesFiat = fiats.getCurrency(userPreferences.pricesFiatId);
     final holdingsFiat = fiats.getCurrency(userPreferences.holdingsFiatId);
     return PriceCard(
       title: Text(asset.currency.name),
-      variation: price.variation,
-      priceText: '${priceFiat.toStringAsFixed(2)} ${pricesFiat.symbol}',
+      variation: price?.variation,
+      priceText:
+          '${priceFiat != null ? priceFiat.toStringAsFixed(2) : '-'} ${pricesFiat.symbol}',
       end: priceFiat,
       holdingText:
-          'Holding: ${holdingValueFiat.toStringAsFixed(2)} ${holdingsFiat.symbol} (${asset.amount.toString()} ${asset.currency.symbol})',
+          'Holding: ${holdingValueFiat != null ? holdingValueFiat.toStringAsFixed(2) : '-'} ${holdingsFiat.symbol} (${asset.amount.toString()} ${asset.currency.symbol})',
     );
   }
 }
