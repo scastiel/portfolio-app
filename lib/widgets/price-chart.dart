@@ -106,6 +106,8 @@ class PriceChartState extends State<PriceChart> {
         primaryMeasureAxis:
             new charts.NumericAxisSpec(renderSpec: charts.NoneRenderSpec()),
         secondaryMeasureAxis: new charts.NumericAxisSpec(
+          tickProviderSpec:
+              charts.BasicNumericTickProviderSpec(desiredTickCount: 5),
           showAxisLine: false,
           renderSpec: detailed
               ? new charts.SmallTickRendererSpec(
@@ -119,7 +121,7 @@ class PriceChartState extends State<PriceChart> {
                   minimumPaddingBetweenLabelsPx: 5,
                 )
               : new charts.NoneRenderSpec(),
-          viewport: getViewport(values),
+          viewport: detailed ? null : getViewport(values),
         ),
         domainAxis: new charts.DateTimeAxisSpec(
           showAxisLine: false,
@@ -138,16 +140,18 @@ class PriceChartState extends State<PriceChart> {
                 )
               : new charts.NoneRenderSpec(),
         ),
-        selectionModels: [
-          new charts.SelectionModelConfig(
-            type: charts.SelectionModelType.info,
-            changedListener: _onSelectionChanged,
-          )
-        ],
+        selectionModels: detailed
+            ? [
+                new charts.SelectionModelConfig(
+                  type: charts.SelectionModelType.info,
+                  changedListener: _onSelectionChanged,
+                )
+              ]
+            : null,
         behaviors: [
           new charts.SelectNearest(
             eventTrigger: charts.SelectionTrigger.tapAndDrag,
-          )
+          ),
         ],
       );
     }
