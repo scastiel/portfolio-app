@@ -12,6 +12,7 @@ import 'model/price.dart';
 
 abstract class PricesFetcher {
   subscribeForCurrency(Currency currency, void Function(Price) onUpdate);
+  Future<void> refresh();
 }
 
 class CoinGeckoPricesFetcher extends PricesFetcher {
@@ -39,7 +40,7 @@ class CoinGeckoPricesFetcher extends PricesFetcher {
     return CoinGeckoPricesFetcher(currencyIds: currencyIds, fiatIds: fiatIds);
   }
 
-  _fetchPrices() async {
+  Future<void> _fetchPrices() async {
     final apiCurrencyIds =
         currencyIds.map((currencyId) => currenciesMapping[currencyId]);
     final uri = Uri.https('api.coingecko.com', '/api/v3/simple/price', {
@@ -101,6 +102,11 @@ class CoinGeckoPricesFetcher extends PricesFetcher {
     }
     _addObserver(currency.id, onUpdate);
   }
+
+  @override
+  Future<void> refresh() async {
+    await _fetchPrices();
+  }
 }
 
 class MockPricesFetcher extends PricesFetcher {
@@ -125,4 +131,7 @@ class MockPricesFetcher extends PricesFetcher {
 
     _updatePrice();
   }
+
+  @override
+  Future<void> refresh() async {}
 }
