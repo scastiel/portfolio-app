@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../model/history-duration.dart';
 import '../prices-fetcher.dart';
@@ -15,6 +16,7 @@ class PortfolioApp extends StatefulWidget {
 }
 
 class _PortfolioAppState extends State<PortfolioApp> {
+  bool _loaded = false;
   UserPreferences _userPreferences;
 
   static const currencies = Currencies.withFixtureData();
@@ -28,11 +30,29 @@ class _PortfolioAppState extends State<PortfolioApp> {
   @override
   void initState() {
     super.initState();
-    _userPreferences = UserPreferences(
-      pricesFiatId: 'usd',
-      holdingsFiatId: 'cad',
-      historyDuration: HistoryDuration.month,
-    );
+    _initPreferences();
+  }
+
+  void _initPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _userPreferences = UserPreferences(
+        pricesFiatId: prefs.getString('prefs.pricesFiatId') ?? 'usd',
+        holdingsFiatId: prefs.getString('prefs.holdingsFiatId') ?? 'cad',
+        historyDuration: historyDurationFromString(
+                prefs.getString('prefs.historyDuration')) ??
+            HistoryDuration.threeMonths,
+      );
+      _loaded = true;
+    });
+  }
+
+  void _updatePreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setString('prefs.pricesFiatId', _userPreferences.pricesFiatId);
+    prefs.setString('prefs.holdingsFiatId', _userPreferences.holdingsFiatId);
+    prefs.setString('prefs.historyDuration',
+        historyDurationToString(_userPreferences.historyDuration));
   }
 
   @override
@@ -41,24 +61,41 @@ class _PortfolioAppState extends State<PortfolioApp> {
       title: 'Portfolio',
       theme: ThemeData.light(),
       darkTheme: ThemeData.dark(),
-      home: Scaffold(
-        body: Dashboard(
+      home: _loaded ? _buildHome() : LoadingScreen(),
+    );
+  }
+
+  Widget _buildHome() {
+    return Scaffold(
+      body: Dashboard(
+        portfolio: portfolio,
+        userPreferences: _userPreferences,
+        fiats: fiats,
+        currencies: currencies,
+        setHistoryDuration: (historyDuration) {
+          setState(() {
+            _userPreferences = _userPreferences.copyWith(
+              historyDuration: historyDuration,
+            );
+            _updatePreferences();
+          });
+        },
+        pricesFetcher: CoinGeckoPricesFetcher.forPortfolio(
           portfolio: portfolio,
           userPreferences: _userPreferences,
-          fiats: fiats,
-          currencies: currencies,
-          setHistoryDuration: (historyDuration) {
-            setState(() {
-              _userPreferences = _userPreferences.copyWith(
-                historyDuration: historyDuration,
-              );
-            });
-          },
-          pricesFetcher: CoinGeckoPricesFetcher.forPortfolio(
-            portfolio: portfolio,
-            userPreferences: _userPreferences,
-          ),
         ),
+      ),
+    );
+  }
+}
+
+class LoadingScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(color: Theme.of(context).primaryColor),
+      child: Center(
+        child: RefreshProgressIndicator(),
       ),
     );
   }
