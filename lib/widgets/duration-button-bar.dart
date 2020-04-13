@@ -66,7 +66,7 @@ class HistoryDurationChip extends StatelessWidget {
       case HistoryDuration.sixMonths:
         return '6m';
       case HistoryDuration.year:
-        return '6y';
+        return '1y';
       case HistoryDuration.twoYears:
         return '2y';
     }

@@ -45,7 +45,7 @@ String historyDurationToString(HistoryDuration historyDuration) {
     case HistoryDuration.sixMonths:
       return '6m';
     case HistoryDuration.year:
-      return '6y';
+      return '1y';
     case HistoryDuration.twoYears:
       return '2y';
   }
@@ -63,7 +63,7 @@ HistoryDuration historyDurationFromString(String str) {
       return HistoryDuration.threeMonths;
     case '6m':
       return HistoryDuration.sixMonths;
-    case '6y':
+    case '1y':
       return HistoryDuration.year;
     case '2y':
       return HistoryDuration.twoYears;

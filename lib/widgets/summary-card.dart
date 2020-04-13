@@ -80,6 +80,9 @@ class _SummaryState extends State<Summary> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.pricesFetcher != widget.pricesFetcher) {
       _disposePricesFetcher();
+      setState(() {
+        _histories = {};
+      });
       _initPricesFetcher();
     }
   }

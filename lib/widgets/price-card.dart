@@ -48,7 +48,9 @@ class PriceCardState extends State<PriceCard> {
   }
 
   _buildBackgroundChart() {
-    if (widget.history == null) return Text('');
+    if (widget.history == null) {
+      return Container(height: 4, child: LinearProgressIndicator());
+    }
     return Container(
       child: Padding(
         padding: const EdgeInsets.only(top: 32.0),
@@ -63,14 +65,15 @@ class PriceCardState extends State<PriceCard> {
   }
 
   _buildDetailedChart() {
-    if (widget.history == null) return Text('');
     return Container(
-      child: PriceChart(
-        history: widget.history,
-        detailed: true,
-        currency: widget.currency,
-        fiat: widget.fiat,
-      ),
+      child: widget.history == null
+          ? Center(child: RefreshProgressIndicator())
+          : PriceChart(
+              history: widget.history,
+              detailed: true,
+              currency: widget.currency,
+              fiat: widget.fiat,
+            ),
       height: 215,
     );
   }

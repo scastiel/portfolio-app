@@ -35,6 +35,9 @@ class _AssetCardState extends State<AssetCard> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.pricesFetcher != widget.pricesFetcher) {
       _disposePricesFetcher();
+      setState(() {
+        _history = null;
+      });
       _initPricesFetcher();
     }
   }
