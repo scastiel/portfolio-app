@@ -60,13 +60,13 @@ class HistoryDurationChip extends StatelessWidget {
       case HistoryDuration.threeDays:
         return '3d';
       case HistoryDuration.month:
-        return 'M';
+        return '1m';
       case HistoryDuration.threeMonths:
         return '3m';
       case HistoryDuration.sixMonths:
         return '6m';
       case HistoryDuration.year:
-        return 'Y';
+        return '6y';
       case HistoryDuration.twoYears:
         return '2y';
     }
