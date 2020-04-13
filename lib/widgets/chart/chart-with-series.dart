@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:portfolio/widgets/chart/time-series-price.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
+
+import 'time-series-price.dart';
 
 charts.Color convertColor(Color color) {
   return charts.Color(

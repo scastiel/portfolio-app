@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:portfolio/model/history-duration.dart';
+
+import 'history-duration.dart';
 
 class UserPreferences {
   final String pricesFiatId;

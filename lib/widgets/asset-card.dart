@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:portfolio/model/price.dart';
 
+import '../model/price.dart';
 import '../model/currencies.dart';
 import '../model/portfolio.dart';
 import '../model/user-preferences.dart';

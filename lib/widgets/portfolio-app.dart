@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:portfolio/model/history-duration.dart';
-import 'package:portfolio/prices-fetcher.dart';
 
+import '../model/history-duration.dart';
+import '../prices-fetcher.dart';
 import '../model/currencies.dart';
 import '../model/portfolio.dart';
 import '../model/user-preferences.dart';

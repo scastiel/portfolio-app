@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:portfolio/prices-fetcher.dart';
+
+import '../prices-fetcher.dart';
 
 class PricesRefreshIndicator extends StatefulWidget {
   final Widget child;

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:portfolio/model/history-duration.dart';
+
+import '../model/history-duration.dart';
 
 class DurationButtonBar extends StatelessWidget {
   final HistoryDuration selectedHistoryDuration;

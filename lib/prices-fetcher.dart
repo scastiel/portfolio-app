@@ -2,12 +2,12 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:portfolio/model/currencies.dart';
-import 'package:portfolio/model/history-duration.dart';
-import 'package:portfolio/model/portfolio.dart';
-import 'package:portfolio/model/user-preferences.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'model/currencies.dart';
+import 'model/history-duration.dart';
+import 'model/portfolio.dart';
+import 'model/user-preferences.dart';
 import 'model/price.dart';
 
 abstract class PricesFetcher {

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:portfolio/model/history-duration.dart';
-import 'package:portfolio/widgets/asset-card.dart';
 
+import '../model/history-duration.dart';
 import '../model/currencies.dart';
 import '../model/user-preferences.dart';
 import '../model/portfolio.dart';
 import '../prices-fetcher.dart';
+import 'asset-card.dart';
 import 'duration-button-bar.dart';
 import 'portfolio-app-bar.dart';
 import 'prices-refresh-indicator.dart';
