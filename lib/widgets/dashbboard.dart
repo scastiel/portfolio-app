@@ -5,6 +5,7 @@ import '../model/currencies.dart';
 import '../model/user-preferences.dart';
 import '../model/portfolio.dart';
 import '../prices-fetcher.dart';
+import 'portfolio-app-bar.dart';
 import 'prices-refresh-indicator.dart';
 import 'summary-card.dart';
 
@@ -29,14 +30,7 @@ class Dashboard extends StatelessWidget {
       pricesFetcher: pricesFetcher,
       child: CustomScrollView(
         slivers: [
-          SliverAppBar(
-            title: Text(
-              'My portfolio',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-            centerTitle: false,
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          ),
+          PortfolioAppBar(),
           SliverList(
             delegate: SliverChildListDelegate([
               Summary(
