@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:portfolio/model/currencies.dart';
 import 'package:portfolio/model/portfolio.dart';
 import 'package:portfolio/model/user-preferences.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'model/price.dart';
 
@@ -22,12 +23,39 @@ class CoinGeckoPricesFetcher extends PricesFetcher {
   final Set<String> currencyIds;
   final Set<String> fiatIds;
 
-  final Map<String, Price> _prices = {};
   bool _isListening = false;
   Map<String, Set<Function(Price)>> _observers = {};
   Set<_HistoryObserver> _historyObservers = {};
 
   CoinGeckoPricesFetcher({@required this.currencyIds, @required this.fiatIds});
+
+  Future<bool> _hasPrice(String currencyId) async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getKeys().any((key) => key.startsWith('$currencyId-'));
+  }
+
+  Future<Price> _getPrice(String currencyId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final fiatPrices = prefs
+        .getKeys()
+        .where((key) => key.startsWith('$currencyId-'))
+        .fold(
+            <String, double>{},
+            (fiatPrices, key) => <String, double>{
+                  ...fiatPrices,
+                  key.split('-').last: prefs.getDouble(key)
+                });
+    final variation = prefs.getDouble('$currencyId-variation');
+    return Price(fiatPrices: fiatPrices, variation: variation);
+  }
+
+  Future<void> _setPrice(String currencyId, Price price) async {
+    final prefs = await SharedPreferences.getInstance();
+    price.fiatPrices.forEach((fiatId, value) {
+      prefs.setDouble('$currencyId-$fiatId', value);
+    });
+    prefs.setDouble('$currencyId-variation', price.variation);
+  }
 
   factory CoinGeckoPricesFetcher.forPortfolio({
     @required Portfolio portfolio,
@@ -61,10 +89,12 @@ class CoinGeckoPricesFetcher extends PricesFetcher {
             fiatId: result[apiCurrencyId][fiatId]
           },
         );
-        _prices[currencyId] = Price(
-          fiatPrices: fiatPrices,
-          variation: result[apiCurrencyId]['usd_24h_change'],
-        );
+        _setPrice(
+            currencyId,
+            Price(
+              fiatPrices: fiatPrices,
+              variation: result[apiCurrencyId]['usd_24h_change'],
+            ));
       },
     );
     _notifyObservers();
@@ -120,22 +150,22 @@ class CoinGeckoPricesFetcher extends PricesFetcher {
     _fetchHistory();
   }
 
-  _notifyObservers() {
-    currencyIds.forEach((currencyId) {
+  void _notifyObservers() async {
+    for (final currencyId in currencyIds) {
       if (_observers.containsKey(currencyId)) {
-        _observers[currencyId].forEach((callback) {
-          callback(_prices[currencyId]);
-        });
+        for (final callback in _observers[currencyId]) {
+          callback(await _getPrice(currencyId));
+        }
       }
-    });
+    }
   }
 
-  _addObserver(String currencyId, Function(Price) callback) {
+  void _addObserver(String currencyId, Function(Price) callback) async {
     if (!_observers.containsKey(currencyId)) {
       _observers[currencyId] = {};
     }
-    if (_prices.containsKey(currencyId)) {
-      callback(_prices[currencyId]);
+    if (await _hasPrice(currencyId)) {
+      callback(await _getPrice(currencyId));
     }
     _observers[currencyId].add(callback);
   }

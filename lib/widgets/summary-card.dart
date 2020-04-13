@@ -109,6 +109,7 @@ class _SummaryState extends State<Summary> {
   double get _variation => _pricesInitialized
       ? widget.portfolio.assets.fold<double>(0.0, (value, asset) {
           var price = _prices[asset.currency.id];
+          if (price.variation == null) return null;
           return value +
               price.variation *
                   asset.amount *
