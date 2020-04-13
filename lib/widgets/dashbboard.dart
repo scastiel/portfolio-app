@@ -18,6 +18,7 @@ class Dashboard extends StatelessWidget {
   final Currencies fiats;
   final PricesFetcher pricesFetcher;
   final void Function(HistoryDuration) setHistoryDuration;
+  final void Function(UserPreferences) updatePreferences;
 
   const Dashboard({
     @required this.portfolio,
@@ -26,6 +27,7 @@ class Dashboard extends StatelessWidget {
     @required this.fiats,
     @required this.pricesFetcher,
     @required this.setHistoryDuration,
+    @required this.updatePreferences,
   });
 
   @override
@@ -34,7 +36,11 @@ class Dashboard extends StatelessWidget {
       pricesFetcher: pricesFetcher,
       child: CustomScrollView(
         slivers: [
-          PortfolioAppBar(),
+          PortfolioAppBar(
+            fiats: fiats,
+            userPreferences: userPreferences,
+            updatePreferences: updatePreferences,
+          ),
           SliverList(
             delegate: SliverChildListDelegate([
               Summary(

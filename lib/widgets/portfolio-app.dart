@@ -65,6 +65,13 @@ class _PortfolioAppState extends State<PortfolioApp> {
     );
   }
 
+  void updatePreferences(UserPreferences newPreferences) {
+    setState(() {
+      _userPreferences = newPreferences;
+      _updatePreferences();
+    });
+  }
+
   Widget _buildHome() {
     return Scaffold(
       body: Dashboard(
@@ -80,6 +87,7 @@ class _PortfolioAppState extends State<PortfolioApp> {
             _updatePreferences();
           });
         },
+        updatePreferences: updatePreferences,
         pricesFetcher: CoinGeckoPricesFetcher.forPortfolio(
           portfolio: portfolio,
           userPreferences: _userPreferences,
