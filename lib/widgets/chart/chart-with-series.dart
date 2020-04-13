@@ -46,6 +46,7 @@ class ChartWithSeries extends StatelessWidget {
   Widget build(BuildContext context) {
     return charts.TimeSeriesChart(
       seriesList,
+      animate: false,
       customSeriesRenderers: [
         detailed ? detailedSeriesRenderer : notDetailedSeriesRenderer
       ],

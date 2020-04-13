@@ -144,7 +144,9 @@ class PriceCardState extends State<PriceCard> {
                                       .textTheme
                                       .bodyText2
                                       .copyWith(
-                                          color: Theme.of(context).hintColor),
+                                        fontSize: 11,
+                                        color: Theme.of(context).hintColor,
+                                      ),
                                 ),
                               )
                             ]

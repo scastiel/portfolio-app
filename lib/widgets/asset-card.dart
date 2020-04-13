@@ -31,8 +31,15 @@ class _AssetCardState extends State<AssetCard> {
   void Function() _unsubscribeFromHistoryForCurrency;
 
   @override
-  void initState() {
-    super.initState();
+  void didUpdateWidget(AssetCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.pricesFetcher != widget.pricesFetcher) {
+      _disposePricesFetcher();
+      _initPricesFetcher();
+    }
+  }
+
+  void _initPricesFetcher() {
     _unsubscribeFromCurrency = widget.pricesFetcher.subscribeForCurrency(
       widget.asset.currency,
       (price) {
@@ -53,14 +60,24 @@ class _AssetCardState extends State<AssetCard> {
     );
   }
 
-  @override
-  void dispose() {
+  void _disposePricesFetcher() {
     if (_unsubscribeFromHistoryForCurrency != null) {
       _unsubscribeFromHistoryForCurrency();
     }
     if (_unsubscribeFromCurrency != null) {
       _unsubscribeFromCurrency();
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _initPricesFetcher();
+  }
+
+  @override
+  void dispose() {
+    _disposePricesFetcher();
     super.dispose();
   }
 

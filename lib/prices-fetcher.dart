@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:portfolio/model/currencies.dart';
+import 'package:portfolio/model/history-duration.dart';
 import 'package:portfolio/model/portfolio.dart';
 import 'package:portfolio/model/user-preferences.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -22,12 +23,17 @@ class CoinGeckoPricesFetcher extends PricesFetcher {
 
   final Set<String> currencyIds;
   final Set<String> fiatIds;
+  final HistoryDuration historyDuration;
 
   bool _isListening = false;
   Map<String, Set<Function(Price)>> _observers = {};
   Set<_HistoryObserver> _historyObservers = {};
 
-  CoinGeckoPricesFetcher({@required this.currencyIds, @required this.fiatIds});
+  CoinGeckoPricesFetcher({
+    @required this.currencyIds,
+    @required this.fiatIds,
+    @required this.historyDuration,
+  });
 
   Future<bool> _hasPrice(String currencyId) async {
     final prefs = await SharedPreferences.getInstance();
@@ -67,7 +73,11 @@ class CoinGeckoPricesFetcher extends PricesFetcher {
       userPreferences.pricesFiatId,
       userPreferences.holdingsFiatId,
     };
-    return CoinGeckoPricesFetcher(currencyIds: currencyIds, fiatIds: fiatIds);
+    return CoinGeckoPricesFetcher(
+      currencyIds: currencyIds,
+      fiatIds: fiatIds,
+      historyDuration: userPreferences.historyDuration,
+    );
   }
 
   Future<void> _fetchPrices() async {
@@ -108,7 +118,7 @@ class CoinGeckoPricesFetcher extends PricesFetcher {
     final uri = Uri.https(
       'api.coingecko.com',
       '/api/v3/coins/$apiCurrencyId/market_chart',
-      {'vs_currency': fiatId, 'days': '1'},
+      {'vs_currency': fiatId, 'days': getDays(historyDuration).toString()},
     );
     final result = await _callApi(uri);
     final history = result['prices'].fold(
@@ -205,7 +215,9 @@ class CoinGeckoPricesFetcher extends PricesFetcher {
     if (!_isListening) {
       _startListening();
     }
-    return () => _historyObservers.remove(observer);
+    return () {
+      _historyObservers.remove(observer);
+    };
   }
 }
 

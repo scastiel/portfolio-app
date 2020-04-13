@@ -37,6 +37,10 @@ class _SummaryState extends State<Summary> {
   @override
   void initState() {
     super.initState();
+    _initPricesFetcher();
+  }
+
+  void _initPricesFetcher() {
     widget.portfolio.assets.forEach((asset) {
       _unsubscribeFromCurrencies.add(
         widget.pricesFetcher.subscribeForCurrency(asset.currency, (price) {
@@ -61,10 +65,23 @@ class _SummaryState extends State<Summary> {
 
   @override
   void dispose() {
+    _disposePricesFetcher();
+    super.dispose();
+  }
+
+  void _disposePricesFetcher() {
     _unsubscribeFromHistoryForCurrencies
         .forEach((unsubscribe) => unsubscribe());
     _unsubscribeFromCurrencies.forEach((unsubscribe) => unsubscribe());
-    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(Summary oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.pricesFetcher != widget.pricesFetcher) {
+      _disposePricesFetcher();
+      _initPricesFetcher();
+    }
   }
 
   bool get _pricesInitialized => widget.portfolio.assets
