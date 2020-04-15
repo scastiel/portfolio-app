@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../model/portfolio.dart';
 import '../model/currencies.dart';
@@ -11,28 +12,27 @@ class CurrencyCard extends StatelessWidget {
   final Price price;
   final Map<DateTime, double> history;
   final UserPreferences userPreferences;
-  final Currencies fiats;
 
   const CurrencyCard({
     @required this.asset,
     @required this.price,
     @required this.history,
     @required this.userPreferences,
-    @required this.fiats,
   });
 
   @override
   Widget build(BuildContext context) {
+    final currencies = Provider.of<Currencies>(context);
     final priceFiat = price?.getInFiat(userPreferences.pricesFiatId);
     final holdingValueFiat = price != null
         ? asset.amount * price.getInFiat(userPreferences.holdingsFiatId)
         : null;
-    final pricesFiat = fiats.getCurrency(userPreferences.pricesFiatId);
-    final holdingsFiat = fiats.getCurrency(userPreferences.holdingsFiatId);
+    final pricesFiat = currencies.getCurrency(userPreferences.pricesFiatId);
+    final holdingsFiat = currencies.getCurrency(userPreferences.holdingsFiatId);
     return PriceCard(
       title: Text(asset.currency.name),
       currency: asset.currency,
-      fiat: fiats.getCurrency(userPreferences.pricesFiatId),
+      fiat: currencies.getCurrency(userPreferences.pricesFiatId),
       variation: price?.variation,
       priceText:
           '${priceFiat != null ? priceFiat.toStringAsFixed(2) : '-'} ${pricesFiat.symbol}',

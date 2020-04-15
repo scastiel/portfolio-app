@@ -20,19 +20,26 @@ abstract class PricesFetcher {
 
 class CoinGeckoPricesFetcher extends PricesFetcher {
   static const currenciesMapping = {'btc': 'bitcoin', 'eth': 'ethereum'};
+  static final httpClient = HttpClient();
+  static Future<void> _lastCall;
 
-  final Set<String> currencyIds;
-  final Set<String> fiatIds;
-  final HistoryDuration historyDuration;
+  final UserPreferences userPreferences;
+  final Portfolio portfolio;
+
+  Set<String> get currencyIds =>
+      portfolio.assets.map((asset) => asset.currency.id).toSet();
+  Set<String> get fiatIds => {
+        userPreferences.pricesFiatId,
+        userPreferences.holdingsFiatId,
+      };
 
   bool _isListening = false;
   Map<String, Set<Function(Price)>> _observers = {};
   Set<_HistoryObserver> _historyObservers = {};
 
   CoinGeckoPricesFetcher({
-    @required this.currencyIds,
-    @required this.fiatIds,
-    @required this.historyDuration,
+    @required this.portfolio,
+    @required this.userPreferences,
   });
 
   Future<bool> _hasPrice(String currencyId) async {
@@ -61,23 +68,6 @@ class CoinGeckoPricesFetcher extends PricesFetcher {
       prefs.setDouble('$currencyId-$fiatId', value);
     });
     prefs.setDouble('$currencyId-variation', price.variation);
-  }
-
-  factory CoinGeckoPricesFetcher.forPortfolio({
-    @required Portfolio portfolio,
-    @required UserPreferences userPreferences,
-  }) {
-    final currencyIds =
-        portfolio.assets.map((asset) => asset.currency.id).toSet();
-    final fiatIds = {
-      userPreferences.pricesFiatId,
-      userPreferences.holdingsFiatId,
-    };
-    return CoinGeckoPricesFetcher(
-      currencyIds: currencyIds,
-      fiatIds: fiatIds,
-      historyDuration: userPreferences.historyDuration,
-    );
   }
 
   Future<void> _fetchPrices() async {
@@ -118,7 +108,10 @@ class CoinGeckoPricesFetcher extends PricesFetcher {
     final uri = Uri.https(
       'api.coingecko.com',
       '/api/v3/coins/$apiCurrencyId/market_chart',
-      {'vs_currency': fiatId, 'days': getDays(historyDuration).toString()},
+      {
+        'vs_currency': fiatId,
+        'days': getDays(userPreferences.historyDuration).toString()
+      },
     );
     final result = await _callApi(uri);
     final history = result['prices'].fold(
@@ -136,14 +129,32 @@ class CoinGeckoPricesFetcher extends PricesFetcher {
   }
 
   Future _callApi(Uri uri) async {
-    final request = await HttpClient().getUrl(uri);
-    final response = await request.close();
-    var json = '';
-    await for (final chunk in response.transform(Utf8Decoder())) {
-      json += chunk;
+    print('Calling $uri…');
+    if (_lastCall != null) {
+      await _lastCall;
     }
-    final result = JsonCodec().decode(json);
-    return result;
+
+    Future<void> _makeTheCall() async {
+      try {
+        final request = await httpClient.getUrl(uri);
+        final response = await request.close();
+        var json = '';
+        await for (final chunk in response.transform(Utf8Decoder())) {
+          json += chunk;
+        }
+        if (json == 'Throttled') {
+          await Future.delayed(Duration(seconds: 1));
+          return await _callApi(uri);
+        }
+        final result = JsonCodec().decode(json);
+        return result;
+      } catch (err) {
+        print('Error calling the API at $uri: $err');
+      }
+    }
+
+    _lastCall = _makeTheCall();
+    return _lastCall;
   }
 
   void _fetchHistory() {

@@ -1,20 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:portfolio/model/user-preferences.dart';
+import 'package:provider/provider.dart';
 
 import '../model/currencies.dart';
 
 class SettingsScreen extends StatelessWidget {
-  final Currencies fiats;
-  final UserPreferences userPreferences;
-  final void Function(UserPreferences) updatePreferences;
-
-  const SettingsScreen({
-    Key key,
-    @required this.fiats,
-    @required this.userPreferences,
-    @required this.updatePreferences,
-  }) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,13 +25,7 @@ class SettingsScreen extends StatelessWidget {
             automaticallyImplyLeading: false,
           ),
           SliverList(
-            delegate: SliverChildListDelegate([
-              Settings(
-                fiats: fiats,
-                userPreferences: userPreferences,
-                updatePreferences: updatePreferences,
-              )
-            ]),
+            delegate: SliverChildListDelegate([Settings()]),
           ),
         ],
       ),
@@ -50,19 +34,10 @@ class SettingsScreen extends StatelessWidget {
 }
 
 class Settings extends StatelessWidget {
-  final Currencies fiats;
-  final UserPreferences userPreferences;
-  final void Function(UserPreferences) updatePreferences;
-
-  const Settings({
-    Key key,
-    @required this.fiats,
-    @required this.userPreferences,
-    @required this.updatePreferences,
-  }) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
+    final userPreferences = Provider.of<UserPreferences>(context);
+    final currencies = Provider.of<Currencies>(context);
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Card(
@@ -72,11 +47,9 @@ class Settings extends StatelessWidget {
             ListTile(
               title: Text('Currency for prices'),
               trailing: CurrencyDropdownFormField(
-                fiats: fiats,
-                currency: fiats.getCurrency(userPreferences.pricesFiatId),
+                currency: currencies.getCurrency(userPreferences.pricesFiatId),
                 onCurrencySelected: (fiat) {
-                  updatePreferences(
-                      userPreferences.copyWith(pricesFiatId: fiat.id));
+                  userPreferences.pricesFiatId = fiat.id;
                 },
               ),
             ),
@@ -84,11 +57,10 @@ class Settings extends StatelessWidget {
             ListTile(
               title: Text('Currency for holdings'),
               trailing: CurrencyDropdownFormField(
-                fiats: fiats,
-                currency: fiats.getCurrency(userPreferences.holdingsFiatId),
+                currency:
+                    currencies.getCurrency(userPreferences.holdingsFiatId),
                 onCurrencySelected: (fiat) {
-                  updatePreferences(
-                      userPreferences.copyWith(holdingsFiatId: fiat.id));
+                  userPreferences.holdingsFiatId = fiat.id;
                 },
               ),
             ),
@@ -100,22 +72,21 @@ class Settings extends StatelessWidget {
 }
 
 class CurrencyDropdownFormField extends StatelessWidget {
-  final Currencies fiats;
   final Currency currency;
   final void Function(Currency) onCurrencySelected;
 
   const CurrencyDropdownFormField({
     Key key,
-    @required this.fiats,
     @required this.currency,
     this.onCurrencySelected,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final currencies = Provider.of<Currencies>(context);
     return DropdownButton(
       value: currency,
-      items: fiats.currencies.values
+      items: currencies.fiats
           .map(
             (currency) => DropdownMenuItem(
               value: currency,

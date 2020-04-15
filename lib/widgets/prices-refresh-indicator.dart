@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../prices-fetcher.dart';
 
 class PricesRefreshIndicator extends StatefulWidget {
   final Widget child;
-  final PricesFetcher pricesFetcher;
 
   const PricesRefreshIndicator({
     Key key,
     @required this.child,
-    @required this.pricesFetcher,
   }) : super(key: key);
 
   @override
@@ -19,18 +18,21 @@ class PricesRefreshIndicator extends StatefulWidget {
 class _PricesRefreshIndicatorState extends State<PricesRefreshIndicator> {
   bool _isRefreshing = false;
 
-  Future<void> _refresh() async {
-    if (_isRefreshing) return;
-    _isRefreshing = true;
-    await widget.pricesFetcher.refresh();
-    _isRefreshing = false;
-  }
-
   @override
   Widget build(BuildContext context) {
     return RefreshIndicator(
-      // displacement: 70,
-      onRefresh: _refresh,
+      onRefresh: () async {
+        if (_isRefreshing) return;
+        final pricesFetcher =
+            Provider.of<PricesFetcher>(context, listen: false);
+        setState(() {
+          _isRefreshing = true;
+        });
+        await pricesFetcher.refresh();
+        setState(() {
+          _isRefreshing = false;
+        });
+      },
       child: widget.child,
     );
   }

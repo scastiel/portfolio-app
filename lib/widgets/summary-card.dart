@@ -1,6 +1,8 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:portfolio/model/history-duration.dart';
+import 'package:provider/provider.dart';
 
 import '../model/currencies.dart';
 import '../model/portfolio.dart';
@@ -9,27 +11,37 @@ import '../model/user-preferences.dart';
 import '../prices-fetcher.dart';
 import 'price-card.dart';
 
-class Summary extends StatefulWidget {
+class SummaryWrapper extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<Portfolio>(
+      builder: (_, portfolio, __) => Consumer<UserPreferences>(
+        builder: (_, userPreferences, __) => _Summary(
+          portfolio: portfolio,
+          userPreferences: userPreferences,
+        ),
+      ),
+    );
+  }
+}
+
+class _Summary extends StatefulWidget {
   final Portfolio portfolio;
   final UserPreferences userPreferences;
-  final Currencies currencies;
-  final Currencies fiats;
-  final PricesFetcher pricesFetcher;
 
-  const Summary({
+  const _Summary({
     @required this.portfolio,
     @required this.userPreferences,
-    @required this.currencies,
-    @required this.fiats,
-    @required this.pricesFetcher,
   });
 
   @override
   _SummaryState createState() => _SummaryState();
 }
 
-class _SummaryState extends State<Summary> {
+class _SummaryState extends State<_Summary> {
   Map<String, Price> _prices = {};
+  bool _pricesFetcherInitialized = false;
+  HistoryDuration _historyDuration;
   Map<String, Map<DateTime, double>> _histories = {};
   Set<void Function()> _unsubscribeFromHistoryForCurrencies = {};
   Set<void Function()> _unsubscribeFromCurrencies = {};
@@ -37,20 +49,23 @@ class _SummaryState extends State<Summary> {
   @override
   void initState() {
     super.initState();
-    _initPricesFetcher();
   }
 
   void _initPricesFetcher() {
+    final pricesFetcher = Provider.of<PricesFetcher>(context);
+    setState(() {
+      _historyDuration = widget.userPreferences.historyDuration;
+    });
     widget.portfolio.assets.forEach((asset) {
       _unsubscribeFromCurrencies.add(
-        widget.pricesFetcher.subscribeForCurrency(asset.currency, (price) {
+        pricesFetcher.subscribeForCurrency(asset.currency, (price) {
           setState(() {
             _prices[asset.currency.id] = price;
           });
         }),
       );
       _unsubscribeFromHistoryForCurrencies.add(
-        widget.pricesFetcher.subscribeToHistoryForCurrency(
+        pricesFetcher.subscribeToHistoryForCurrency(
           asset.currency.id,
           widget.userPreferences.holdingsFiatId,
           (history) {
@@ -76,9 +91,20 @@ class _SummaryState extends State<Summary> {
   }
 
   @override
-  void didUpdateWidget(Summary oldWidget) {
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_pricesFetcherInitialized) {
+      _initPricesFetcher();
+      setState(() {
+        _pricesFetcherInitialized = true;
+      });
+    }
+  }
+
+  @override
+  void didUpdateWidget(_Summary oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.pricesFetcher != widget.pricesFetcher) {
+    if (widget.userPreferences.historyDuration != _historyDuration) {
       _disposePricesFetcher();
       setState(() {
         _histories = {};
@@ -140,15 +166,16 @@ class _SummaryState extends State<Summary> {
 
   @override
   Widget build(BuildContext context) {
+    final currencies = Provider.of<Currencies>(context);
     final holdingsFiat =
-        widget.fiats.getCurrency(widget.userPreferences.holdingsFiatId);
+        currencies.getCurrency(widget.userPreferences.holdingsFiatId);
     return PriceCard(
       title: Text('Total value'),
       variation: _variation,
       priceText:
           '${_totalValue != null ? _totalValue.toStringAsFixed(2) : '-'} ${holdingsFiat.symbol}',
       history: _history,
-      fiat: widget.fiats.getCurrency(widget.userPreferences.holdingsFiatId),
+      fiat: currencies.getCurrency(widget.userPreferences.holdingsFiatId),
     );
   }
 }

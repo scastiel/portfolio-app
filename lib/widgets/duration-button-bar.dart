@@ -1,19 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:portfolio/model/user-preferences.dart';
+import 'package:portfolio/prices-fetcher.dart';
+import 'package:provider/provider.dart';
 
 import '../model/history-duration.dart';
 
 class DurationButtonBar extends StatelessWidget {
-  final HistoryDuration selectedHistoryDuration;
-  final void Function(HistoryDuration) selectHistoryDuration;
-
-  const DurationButtonBar({
-    Key key,
-    @required this.selectedHistoryDuration,
-    @required this.selectHistoryDuration,
-  }) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
+    final userPreferences = Provider.of<UserPreferences>(context);
+    final pricesFetcher = Provider.of<PricesFetcher>(context);
     return Padding(
       padding: const EdgeInsets.only(top: 8.0),
       child: Transform(
@@ -27,9 +23,11 @@ class DurationButtonBar extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 4.0),
                   child: HistoryDurationChip(
                     historyDuration: historyDuration,
-                    selected: selectedHistoryDuration == historyDuration,
+                    selected:
+                        userPreferences.historyDuration == historyDuration,
                     setSelected: () {
-                      selectHistoryDuration(historyDuration);
+                      userPreferences.historyDuration = historyDuration;
+                      pricesFetcher.refresh();
                     },
                   ),
                 ),

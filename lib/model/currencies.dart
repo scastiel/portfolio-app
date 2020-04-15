@@ -6,23 +6,28 @@ class Currency {
   final String id;
   final String name;
   final String symbol;
-  const Currency(
-      {@required this.id, @required this.name, @required this.symbol});
+  final bool fiat;
+  const Currency({
+    @required this.id,
+    @required this.name,
+    @required this.symbol,
+    this.fiat = false,
+  });
 }
 
 class Currencies {
-  final Map<String, Currency> currencies;
+  final Set<Currency> currencies;
 
   const Currencies({@required this.currencies});
 
   const Currencies.withFixtureData() : this(currencies: fixtures.currencies);
 
-  const Currencies.withFiatFixtureData() : this(currencies: fixtures.fiats);
+  Set<Currency> get cryptos =>
+      currencies.where((currency) => currency.fiat == false).toSet();
+  Set<Currency> get fiats =>
+      currencies.where((currency) => currency.fiat == true).toSet();
 
   Currency getCurrency(String currencyId) {
-    if (currencies.containsKey(currencyId)) {
-      return currencies[currencyId];
-    }
-    throw ArgumentError('Invalid currency ID: $currencyId');
+    return currencies.firstWhere((currency) => currency.id == currencyId);
   }
 }
