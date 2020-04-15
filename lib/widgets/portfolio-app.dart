@@ -48,8 +48,8 @@ class _App extends StatelessWidget {
     }
     return MaterialApp(
       title: 'Portfolio',
-      theme: ThemeData.light(),
-      darkTheme: ThemeData.dark(),
+      theme: _getTheme(ThemeData.light()),
+      darkTheme: _getTheme(ThemeData.dark()),
       themeMode: userPreferences.appTheme,
       home: Scaffold(
         body: Dashboard(),
@@ -57,6 +57,21 @@ class _App extends StatelessWidget {
     );
   }
 }
+
+_getTheme(ThemeData baseTheme) => baseTheme.copyWith(
+      appBarTheme: AppBarTheme(
+        color: baseTheme.scaffoldBackgroundColor,
+        brightness: baseTheme.brightness,
+        textTheme: TextTheme(
+          headline6: TextStyle(
+            fontSize: 22,
+            color: baseTheme.hintColor,
+          ),
+        ),
+        actionsIconTheme:
+            baseTheme.iconTheme.copyWith(color: baseTheme.hintColor),
+      ),
+    );
 
 class _LoadingScreen extends StatelessWidget {
   @override

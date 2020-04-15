@@ -12,6 +12,7 @@ class SettingsScreen extends StatelessWidget {
         slivers: [
           SliverAppBar(
             title: Text('Settings'),
+            centerTitle: false,
             pinned: true,
             actions: [
               IconButton(

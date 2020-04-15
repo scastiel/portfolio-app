@@ -37,14 +37,23 @@ class PriceChartState extends State<PriceChart> with WidgetsBindingObserver {
   @override
   initState() {
     super.initState();
-    _brightness = WidgetsBinding.instance.window.platformBrightness;
     WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (Theme.of(context).brightness != _brightness) {
+      setState(() {
+        _brightness = Theme.of(context).brightness;
+      });
+    }
   }
 
   @override
   didChangePlatformBrightness() {
     setState(() {
-      _brightness = WidgetsBinding.instance.window.platformBrightness;
+      _brightness = Theme.of(context).brightness;
     });
   }
 
