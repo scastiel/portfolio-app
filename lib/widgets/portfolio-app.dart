@@ -50,6 +50,7 @@ class _App extends StatelessWidget {
       title: 'Portfolio',
       theme: ThemeData.light(),
       darkTheme: ThemeData.dark(),
+      themeMode: userPreferences.appTheme,
       home: Scaffold(
         body: Dashboard(),
       ),

@@ -25,7 +25,8 @@ class SettingsScreen extends StatelessWidget {
             automaticallyImplyLeading: false,
           ),
           SliverList(
-            delegate: SliverChildListDelegate([Settings()]),
+            delegate:
+                SliverChildListDelegate([ThemeSettings(), FiatSettings()]),
           ),
         ],
       ),
@@ -33,7 +34,53 @@ class SettingsScreen extends StatelessWidget {
   }
 }
 
-class Settings extends StatelessWidget {
+class ThemeSettings extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final userPreferences = Provider.of<UserPreferences>(context);
+    return Padding(
+      padding:
+          const EdgeInsets.only(top: 8.0, right: 8.0, bottom: 0.0, left: 8.0),
+      child: Card(
+        elevation: 3,
+        child: Column(
+          children: [
+            ListTile(
+              title: Text('Theme'),
+              trailing: DropdownButton(
+                value: userPreferences.appTheme,
+                items: ThemeMode.values
+                    .map(
+                      (theme) => DropdownMenuItem(
+                        value: theme,
+                        child: Text(_getThemeLabel(theme)),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (newTheme) {
+                  userPreferences.appTheme = newTheme;
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _getThemeLabel(ThemeMode theme) {
+    switch (theme) {
+      case ThemeMode.system:
+        return 'System';
+      case ThemeMode.light:
+        return 'Light';
+      case ThemeMode.dark:
+        return 'Dark';
+    }
+  }
+}
+
+class FiatSettings extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final userPreferences = Provider.of<UserPreferences>(context);

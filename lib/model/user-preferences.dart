@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'theme-mode.dart';
 import 'history-duration.dart';
 
 class UserPreferences extends ChangeNotifier {
@@ -8,11 +9,13 @@ class UserPreferences extends ChangeNotifier {
   String _pricesFiatId;
   String _holdingsFiatId;
   HistoryDuration _historyDuration;
+  ThemeMode _appTheme;
 
   bool get initialized => _initialized;
   String get pricesFiatId => _pricesFiatId;
   String get holdingsFiatId => _holdingsFiatId;
   HistoryDuration get historyDuration => _historyDuration;
+  ThemeMode get appTheme => _appTheme;
 
   void initWithSharedPrefs() async {
     final prefs = await SharedPreferences.getInstance();
@@ -21,6 +24,8 @@ class UserPreferences extends ChangeNotifier {
     _historyDuration =
         historyDurationFromString(prefs.getString('prefs.historyDuration')) ??
             HistoryDuration.threeMonths;
+    _appTheme =
+        themeFromString(prefs.getString('prefs.appTheme')) ?? ThemeMode.system;
     _initialized = true;
     notifyListeners();
   }
@@ -32,6 +37,10 @@ class UserPreferences extends ChangeNotifier {
     prefs.setString(
       'prefs.historyDuration',
       historyDurationToString(historyDuration),
+    );
+    prefs.setString(
+      'prefs.appTheme',
+      themeToString(_appTheme),
     );
   }
 
@@ -49,6 +58,12 @@ class UserPreferences extends ChangeNotifier {
 
   set historyDuration(HistoryDuration value) {
     _historyDuration = value;
+    notifyListeners();
+    _updatePrefs();
+  }
+
+  set appTheme(ThemeMode value) {
+    _appTheme = value;
     notifyListeners();
     _updatePrefs();
   }
