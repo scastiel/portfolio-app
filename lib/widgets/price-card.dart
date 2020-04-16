@@ -152,7 +152,9 @@ class PriceCardState extends State<PriceCard> {
   Widget buildNormalContent(BuildContext context) {
     return InkWell(
       onTap: _isExpanded || _editMode ? null : onTap,
-      onLongPress: _isExpanded || _editMode ? null : onLongPress,
+      onLongPress: _isExpanded || _editMode || widget.buildEditView == null
+          ? null
+          : onLongPress,
       child: Stack(
         children: [
           ...((!_isExpanded && !_animating) ? [_buildBackgroundChart()] : []),
