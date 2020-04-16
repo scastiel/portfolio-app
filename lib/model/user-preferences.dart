@@ -20,7 +20,7 @@ class UserPreferences extends ChangeNotifier {
   void initWithSharedPrefs() async {
     final prefs = await SharedPreferences.getInstance();
     _pricesFiatId = prefs.getString('prefs.pricesFiatId') ?? 'usd';
-    _holdingsFiatId = prefs.getString('prefs.holdingsFiatId') ?? 'cad';
+    _holdingsFiatId = prefs.getString('prefs.holdingsFiatId') ?? 'usd';
     _historyDuration =
         historyDurationFromString(prefs.getString('prefs.historyDuration')) ??
             HistoryDuration.threeMonths;

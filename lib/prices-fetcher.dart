@@ -26,8 +26,9 @@ class CoinGeckoPricesFetcher extends PricesFetcher {
   final UserPreferences userPreferences;
   final Portfolio portfolio;
 
-  Set<String> get currencyIds =>
-      portfolio.assets.map((asset) => asset.currency.id).toSet();
+  Set<String> get currencyIds => (portfolio.initialized
+      ? portfolio.assets.map((asset) => asset.currency.id).toSet()
+      : <String>{});
   Set<String> get fiatIds => {
         userPreferences.pricesFiatId,
         userPreferences.holdingsFiatId,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_reorderable_list/flutter_reorderable_list.dart';
 import 'package:portfolio/prices-fetcher.dart';
+import 'package:portfolio/widgets/edit-asset-screen.dart';
 import 'package:provider/provider.dart';
 
 import '../model/portfolio.dart';
@@ -79,6 +80,14 @@ class _DashboardState extends State<Dashboard> {
         child: CustomScrollView(
           slivers: [
             PortfolioAppBar(),
+            ...(_assets.length == 0
+                ? [
+                    SliverFillRemaining(
+                      child: NoAssetMessage(),
+                      hasScrollBody: false,
+                    )
+                  ]
+                : []),
             SliverList(
               delegate: SliverChildListDelegate([
                 ...(widget.portfolio.hasHoldings ? [SummaryWrapper()] : []),
@@ -100,6 +109,44 @@ class _DashboardState extends State<Dashboard> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class NoAssetMessage extends StatelessWidget {
+  const NoAssetMessage({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: Text('Your portfolio doesn’t contain any asset yet.'),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: Text('Start by adding a first asset.'),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 48.0),
+            child: RaisedButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => EditAssetScreen(),
+                  ),
+                );
+              },
+              child: Text('Add an asset'),
+            ),
+          ),
+        ],
       ),
     );
   }

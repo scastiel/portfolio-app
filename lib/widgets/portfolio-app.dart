@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:portfolio/widgets/edit-asset-screen.dart';
 import 'package:provider/provider.dart';
@@ -12,10 +14,8 @@ class PortfolioApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currencies = Currencies.withFixtureData();
-    final portfolio = Portfolio(assets: [
-      Asset(currency: currencies.getCurrency('btc'), amount: 0.39112364),
-      Asset(currency: currencies.getCurrency('eth'), amount: 12.9542),
-    ]);
+    final portfolio = Portfolio();
+    portfolio.initWithSharedPrefs(currencies: currencies);
     final userPreferences = UserPreferences();
     userPreferences.initWithSharedPrefs();
 
@@ -44,7 +44,8 @@ class _App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final userPreferences = Provider.of<UserPreferences>(context);
-    if (!userPreferences.initialized) {
+    final portfolio = Provider.of<Portfolio>(context);
+    if (!userPreferences.initialized || !portfolio.initialized) {
       return _LoadingScreen();
     }
     return MaterialApp(
