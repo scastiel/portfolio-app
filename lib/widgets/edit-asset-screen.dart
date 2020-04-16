@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:portfolio/model/currencies.dart';
 import 'package:portfolio/model/portfolio.dart';
 import 'package:portfolio/model/user-preferences.dart';
-import 'package:portfolio/widgets/currencies-screen.dart';
 import 'package:provider/provider.dart';
 
 import 'currency-list-tile.dart';
@@ -12,7 +11,7 @@ import 'currency-list-tile.dart';
 class EditAssetScreen extends StatefulWidget {
   final Asset asset;
 
-  EditAssetScreen({Key key, @required this.asset}) : super(key: key);
+  EditAssetScreen({Key key, this.asset}) : super(key: key);
 
   @override
   _EditAssetScreenState createState() => _EditAssetScreenState();
@@ -21,14 +20,16 @@ class EditAssetScreen extends StatefulWidget {
 class _EditAssetScreenState extends State<EditAssetScreen> {
   TextEditingController _holdingsTextController;
   bool _error = false;
+  bool _cryptoError = false;
   Currency _crypto;
 
   @override
   void initState() {
     super.initState();
-    _holdingsTextController =
-        TextEditingController(text: widget.asset.amount.toString());
-    _crypto = widget.asset.currency;
+    final amount = widget.asset?.amount;
+    _holdingsTextController = TextEditingController(
+        text: amount != null && amount > 0 ? amount.toString() : '');
+    _crypto = widget.asset?.currency;
   }
 
   @override
@@ -41,12 +42,20 @@ class _EditAssetScreenState extends State<EditAssetScreen> {
     final text = _holdingsTextController.text;
     if (text.trim() == '') return 0;
     final holdings = double.tryParse(text);
-    if (holdings == null) {
-      setState(() {
-        _error = true;
-      });
-    }
+    setState(() {
+      _error = holdings == null;
+    });
     return holdings;
+  }
+
+  Currency validateAndGetCrypto() {
+    if (_crypto == null) {
+      setState(() {
+        _cryptoError = true;
+      });
+      return null;
+    }
+    return _crypto;
   }
 
   @override
@@ -57,15 +66,17 @@ class _EditAssetScreenState extends State<EditAssetScreen> {
           _EditAssetAppBar(
             asset: widget.asset,
             validateAndGetHoldings: validateAndGetHoldings,
+            validateAndGetCrypto: validateAndGetCrypto,
           ),
           SliverList(
             delegate: SliverChildListDelegate([
               _EditAssetCurrencies(
-                asset: widget.asset,
                 crypto: _crypto,
+                cryptoError: _cryptoError,
                 updateCrypto: (currency) {
                   setState(() {
                     _crypto = currency;
+                    _cryptoError = false;
                   });
                 },
               ),
@@ -78,7 +89,6 @@ class _EditAssetScreenState extends State<EditAssetScreen> {
                         color: Theme.of(context).hintColor, fontSize: 13)),
               ),
               _EditAssetHoldings(
-                asset: widget.asset,
                 holdingsTextController: _holdingsTextController,
                 error: _error,
               )
@@ -93,18 +103,20 @@ class _EditAssetScreenState extends State<EditAssetScreen> {
 class _EditAssetAppBar extends StatelessWidget {
   const _EditAssetAppBar({
     Key key,
-    @required this.asset,
+    this.asset,
     @required this.validateAndGetHoldings,
+    @required this.validateAndGetCrypto,
   }) : super(key: key);
 
   final Asset asset;
   final double Function() validateAndGetHoldings;
+  final Currency Function() validateAndGetCrypto;
 
   @override
   Widget build(BuildContext context) {
     final portfolio = Provider.of<Portfolio>(context);
     return SliverAppBar(
-      title: Text(asset.currency.name),
+      title: Text(asset?.currency?.name ?? 'New asset'),
       centerTitle: false,
       pinned: true,
       actions: [
@@ -115,9 +127,14 @@ class _EditAssetAppBar extends StatelessWidget {
           ),
           tooltip: 'Save',
           onPressed: () {
+            final crypto = validateAndGetCrypto();
             final amount = validateAndGetHoldings();
-            if (amount != null) {
-              portfolio.updateAsset(asset.copyWith(amount: amount));
+            if (crypto != null && amount != null) {
+              if (asset != null) {
+                portfolio.updateAsset(asset.copyWith(amount: amount));
+              } else {
+                portfolio.addAsset(Asset(currency: crypto, amount: amount));
+              }
               Navigator.of(context).pop();
             }
           },
@@ -141,14 +158,14 @@ class _EditAssetAppBar extends StatelessWidget {
 class _EditAssetCurrencies extends StatelessWidget {
   const _EditAssetCurrencies({
     Key key,
-    @required this.asset,
     @required this.updateCrypto,
     this.crypto,
+    this.cryptoError = false,
   }) : super(key: key);
 
-  final Asset asset;
   final Currency crypto;
   final void Function(Currency) updateCrypto;
+  final bool cryptoError;
 
   @override
   Widget build(BuildContext context) {
@@ -165,6 +182,7 @@ class _EditAssetCurrencies extends StatelessWidget {
               selectedCurrency: crypto,
               onSelected: updateCrypto,
               title: 'Cryptocurrency',
+              error: cryptoError,
             ),
             Divider(height: 1),
             ListTile(
@@ -181,12 +199,10 @@ class _EditAssetCurrencies extends StatelessWidget {
 class _EditAssetHoldings extends StatelessWidget {
   _EditAssetHoldings({
     Key key,
-    @required this.asset,
     @required this.holdingsTextController,
     this.error = false,
   }) : super(key: key);
 
-  final Asset asset;
   final TextEditingController holdingsTextController;
   final bool error;
   final FocusNode holdingsFocusNode = FocusNode();

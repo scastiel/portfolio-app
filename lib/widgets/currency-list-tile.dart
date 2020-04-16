@@ -8,6 +8,7 @@ class CurrencyListTile extends StatelessWidget {
   final void Function(Currency) onSelected;
   final String title;
   final bool fiats;
+  final bool error;
 
   const CurrencyListTile({
     Key key,
@@ -15,6 +16,7 @@ class CurrencyListTile extends StatelessWidget {
     this.selectedCurrency,
     this.title = '',
     this.fiats = false,
+    this.error = false,
   }) : super(key: key);
 
   @override
@@ -34,8 +36,12 @@ class CurrencyListTile extends StatelessWidget {
         children: <Widget>[
           selectedCurrency != null
               ? Text(selectedCurrency.name)
-              : Text('Select'),
-          Icon(Icons.chevron_right),
+              : Text(
+                  'Select',
+                  style: TextStyle(
+                      color: error ? Colors.red : Theme.of(context).hintColor),
+                ),
+          Icon(Icons.chevron_right, color: error ? Colors.red : null),
         ],
       ),
     );

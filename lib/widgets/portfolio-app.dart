@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:portfolio/widgets/edit-asset-screen.dart';
 import 'package:provider/provider.dart';
 
 import '../prices-fetcher.dart';
@@ -52,8 +53,27 @@ class _App extends StatelessWidget {
       darkTheme: _getTheme(ThemeData.dark()),
       themeMode: userPreferences.appTheme,
       home: Scaffold(
-        body: Dashboard(),
+        body: DashboardWrapper(),
+        floatingActionButton: AddAssetFloatingActionButton(),
       ),
+    );
+  }
+}
+
+class AddAssetFloatingActionButton extends StatelessWidget {
+  const AddAssetFloatingActionButton({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return FloatingActionButton(
+      onPressed: () {
+        Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => EditAssetScreen(asset: null)));
+      },
+      tooltip: 'Add asset',
+      child: const Icon(Icons.add),
     );
   }
 }

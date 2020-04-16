@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_reorderable_list/flutter_reorderable_list.dart';
+import 'package:portfolio/prices-fetcher.dart';
 import 'package:provider/provider.dart';
 
 import '../model/portfolio.dart';
@@ -9,7 +10,22 @@ import 'portfolio-app-bar.dart';
 import 'prices-refresh-indicator.dart';
 import 'summary-card.dart';
 
+class DashboardWrapper extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final portfolio = Provider.of<Portfolio>(context);
+    return Dashboard(portfolio: portfolio);
+  }
+}
+
 class Dashboard extends StatefulWidget {
+  final Portfolio portfolio;
+
+  const Dashboard({
+    Key key,
+    @required this.portfolio,
+  }) : super(key: key);
+
   @override
   _DashboardState createState() => _DashboardState();
 }
@@ -34,17 +50,24 @@ class _DashboardState extends State<Dashboard> {
   }
 
   void _reorderDone(Key _) {
-    final portfolio = Provider.of<Portfolio>(context, listen: false);
-    portfolio.reorderAssets(_assets);
+    widget.portfolio.reorderAssets(_assets);
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_assets == null) {
-      final portfolio = Provider.of<Portfolio>(context, listen: false);
-      _assets = [...portfolio.assets];
-    }
+    setState(() {
+      _assets = [...widget.portfolio.assets];
+    });
+  }
+
+  @override
+  void didUpdateWidget(Dashboard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    setState(() {
+      _assets = [...widget.portfolio.assets];
+    });
+    Provider.of<PricesFetcher>(context, listen: false).refresh();
   }
 
   @override

@@ -45,4 +45,9 @@ class Portfolio extends ChangeNotifier {
     _assets = assets;
     notifyListeners();
   }
+
+  void addAsset(Asset asset) {
+    _assets.add(asset);
+    notifyListeners();
+  }
 }
