@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:portfolio/model/currencies.dart';
 import 'package:portfolio/model/portfolio.dart';
 import 'package:portfolio/model/user-preferences.dart';
+import 'package:portfolio/widgets/currencies-screen.dart';
 import 'package:provider/provider.dart';
 
 class EditAssetScreen extends StatefulWidget {
@@ -18,12 +19,14 @@ class EditAssetScreen extends StatefulWidget {
 class _EditAssetScreenState extends State<EditAssetScreen> {
   TextEditingController _holdingsTextController;
   bool _error = false;
+  Currency _crypto;
 
   @override
   void initState() {
     super.initState();
     _holdingsTextController =
         TextEditingController(text: widget.asset.amount.toString());
+    _crypto = widget.asset.currency;
   }
 
   @override
@@ -57,6 +60,12 @@ class _EditAssetScreenState extends State<EditAssetScreen> {
             delegate: SliverChildListDelegate([
               _EditAssetCurrencies(
                 asset: widget.asset,
+                crypto: _crypto,
+                updateCrypto: (currency) {
+                  setState(() {
+                    _crypto = currency;
+                  });
+                },
               ),
               Padding(
                 padding:
@@ -131,9 +140,13 @@ class _EditAssetCurrencies extends StatelessWidget {
   const _EditAssetCurrencies({
     Key key,
     @required this.asset,
+    @required this.updateCrypto,
+    this.crypto,
   }) : super(key: key);
 
   final Asset asset;
+  final Currency crypto;
+  final void Function(Currency) updateCrypto;
 
   @override
   Widget build(BuildContext context) {
@@ -147,8 +160,23 @@ class _EditAssetCurrencies extends StatelessWidget {
         child: Column(
           children: [
             ListTile(
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => CurrenciesScreen(
+                      onSelected: updateCrypto,
+                    ),
+                  ),
+                );
+              },
               title: Text('Cryptocurrency'),
-              trailing: Text(asset.currency.name),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  crypto != null ? Text(crypto.name) : Text('Select'),
+                  Icon(Icons.chevron_right),
+                ],
+              ),
             ),
             Divider(height: 1),
             ListTile(
@@ -163,7 +191,7 @@ class _EditAssetCurrencies extends StatelessWidget {
 }
 
 class _EditAssetHoldings extends StatelessWidget {
-  const _EditAssetHoldings({
+  _EditAssetHoldings({
     Key key,
     @required this.asset,
     @required this.holdingsTextController,
@@ -173,6 +201,7 @@ class _EditAssetHoldings extends StatelessWidget {
   final Asset asset;
   final TextEditingController holdingsTextController;
   final bool error;
+  final FocusNode holdingsFocusNode = FocusNode();
 
   @override
   Widget build(BuildContext context) {
@@ -183,10 +212,14 @@ class _EditAssetHoldings extends StatelessWidget {
         child: Column(
           children: [
             ListTile(
+              onTap: () {
+                holdingsFocusNode.requestFocus();
+              },
               title: Text('Holdings'),
               trailing: Container(
                 width: 150,
                 child: TextField(
+                  focusNode: holdingsFocusNode,
                   controller: holdingsTextController,
                   textAlign: TextAlign.right,
                   keyboardType: const TextInputType.numberWithOptions(
