@@ -74,7 +74,7 @@ class _EditAssetAppBar extends StatelessWidget {
           ),
           tooltip: 'Save',
           onPressed: () {
-            final amount = double.parse(holdingsTextController.text);
+            final amount = double.tryParse(holdingsTextController.text) ?? 0.0;
             portfolio.updateAsset(asset.copyWith(amount: amount));
             Navigator.of(context).pop();
           },

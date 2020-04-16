@@ -76,7 +76,7 @@ class CurrencyCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final currencies = Provider.of<Currencies>(context);
     final priceFiat = price?.getInFiat(userPreferences.pricesFiatId);
-    final holdingValueFiat = price != null
+    final holdingValueFiat = asset.amount > 0 && price != null
         ? asset.amount * price.getInFiat(userPreferences.holdingsFiatId)
         : null;
     final pricesFiat = currencies.getCurrency(userPreferences.pricesFiatId);
@@ -89,8 +89,9 @@ class CurrencyCard extends StatelessWidget {
       priceText:
           '${priceFiat != null ? priceFiat.toStringAsFixed(2) : '-'} ${pricesFiat.symbol}',
       history: history,
-      holdingText:
-          'Holding: ${holdingValueFiat != null ? holdingValueFiat.toStringAsFixed(2) : '-'} ${holdingsFiat.symbol} (${asset.amount.toString()} ${asset.currency.symbol})',
+      holdingText: asset.amount > 0
+          ? 'Holding: ${holdingValueFiat != null ? holdingValueFiat.toStringAsFixed(2) : '-'} ${holdingsFiat.symbol} (${asset.amount.toString()} ${asset.currency.symbol})'
+          : null,
       buildEditView: buildEditView,
     );
   }
