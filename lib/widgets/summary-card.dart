@@ -41,7 +41,6 @@ class _Summary extends StatefulWidget {
 class _SummaryState extends State<_Summary> {
   Map<String, Price> _prices = {};
   bool _pricesFetcherInitialized = false;
-  HistoryDuration _historyDuration;
   Map<String, Map<DateTime, double>> _histories = {};
   Set<void Function()> _unsubscribeFromHistoryForCurrencies = {};
   Set<void Function()> _unsubscribeFromCurrencies = {};
@@ -53,9 +52,6 @@ class _SummaryState extends State<_Summary> {
 
   void _initPricesFetcher() {
     final pricesFetcher = Provider.of<PricesFetcher>(context);
-    setState(() {
-      _historyDuration = widget.userPreferences.historyDuration;
-    });
     widget.portfolio.assets.forEach((asset) {
       _unsubscribeFromCurrencies.add(
         pricesFetcher.subscribeForCurrency(asset.currency, (price) {
@@ -104,13 +100,12 @@ class _SummaryState extends State<_Summary> {
   @override
   void didUpdateWidget(_Summary oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.userPreferences.historyDuration != _historyDuration) {
-      _disposePricesFetcher();
-      setState(() {
-        _histories = {};
-      });
-      _initPricesFetcher();
-    }
+    _disposePricesFetcher();
+    setState(() {
+      _histories = {};
+    });
+    _initPricesFetcher();
+    // }
   }
 
   bool get _pricesInitialized => widget.portfolio.assets

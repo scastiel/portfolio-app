@@ -199,10 +199,8 @@ class CoinGeckoPricesFetcher extends PricesFetcher {
   }
 
   subscribeForCurrency(Currency currency, void Function(Price) onUpdate) {
-    if (!_isListening) {
-      _startListening();
-    }
     _addObserver(currency.id, onUpdate);
+    refresh();
     return () => _removeObserver(currency.id, onUpdate);
   }
 
@@ -224,9 +222,7 @@ class CoinGeckoPricesFetcher extends PricesFetcher {
       onUpdate: onUpdate,
     );
     _historyObservers.add(observer);
-    if (!_isListening) {
-      _startListening();
-    }
+    refresh();
     return () {
       _historyObservers.remove(observer);
     };

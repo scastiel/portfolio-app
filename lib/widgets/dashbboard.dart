@@ -60,6 +60,7 @@ class _DashboardState extends State<Dashboard> {
     setState(() {
       _assets = [...widget.portfolio.assets];
     });
+    Provider.of<PricesFetcher>(context, listen: false).refresh();
   }
 
   @override
