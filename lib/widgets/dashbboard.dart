@@ -34,7 +34,7 @@ class _DashboardState extends State<Dashboard> {
   List<Asset> _assets;
 
   int _indexOfKey(Key key) {
-    return _assets.indexWhere((asset) => Key(asset.currency.id) == key);
+    return _assets.indexWhere((asset) => asset.key == key);
   }
 
   bool _reorderCallback(Key item, Key newPosition) {
@@ -85,7 +85,7 @@ class _DashboardState extends State<Dashboard> {
                 DurationButtonBar(),
                 ..._assets.map(
                   (asset) => ReorderableItem(
-                    key: Key(asset.currency.id),
+                    key: asset.key,
                     childBuilder: (_, state) {
                       return AssetCardWrapper(
                         asset: asset,

@@ -3,13 +3,19 @@ import 'package:flutter/material.dart';
 import 'currencies.dart';
 
 class Asset {
+  final UniqueKey key;
   final Currency currency;
   final double amount;
 
-  const Asset({@required this.currency, @required this.amount});
+  Asset({
+    @required this.currency,
+    @required this.amount,
+    UniqueKey key,
+  }) : this.key = key ?? UniqueKey();
 
   Asset copyWith({Currency currency, double amount}) {
     return Asset(
+      key: key,
       currency: currency ?? this.currency,
       amount: amount ?? this.amount,
     );
@@ -27,19 +33,19 @@ class Portfolio extends ChangeNotifier {
 
   bool get hasHoldings => _assets.any((asset) => asset.amount > 0);
 
-  void updateAsset(Asset asset) {
-    final index = _assets.indexWhere(
-      (element) => element.currency == asset.currency,
+  int _indexOfAsset(Asset asset) {
+    return _assets.indexWhere(
+      (element) => element.key == asset.key,
     );
-    _assets[index] = asset;
+  }
+
+  void updateAsset(Asset asset) {
+    _assets[_indexOfAsset(asset)] = asset;
     notifyListeners();
   }
 
   void removeAsset(Asset asset) {
-    final index = _assets.indexWhere(
-      (element) => element.currency == asset.currency,
-    );
-    _assets.removeAt(index);
+    _assets.removeAt(_indexOfAsset(asset));
     notifyListeners();
   }
 
