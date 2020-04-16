@@ -5,9 +5,14 @@ import 'package:provider/provider.dart';
 class CurrenciesScreen extends StatefulWidget {
   final bool fiats;
   final void Function(Currency currency) onSelected;
+  final String title;
 
-  const CurrenciesScreen({Key key, this.fiats = false, this.onSelected})
-      : super(key: key);
+  const CurrenciesScreen({
+    Key key,
+    this.fiats = false,
+    this.onSelected,
+    this.title = '',
+  }) : super(key: key);
 
   @override
   _CurrenciesScreenState createState() => _CurrenciesScreenState();
@@ -52,7 +57,7 @@ class _CurrenciesScreenState extends State<CurrenciesScreen> {
                 ),
                 onChanged: onSearchChanged,
               )
-            : Text('Cryptocurrency'),
+            : Text(widget.title),
         actions: [
           IconButton(
             icon: _searchMode ? Icon(Icons.close) : Icon(Icons.search),
@@ -86,4 +91,23 @@ class _CurrenciesScreenState extends State<CurrenciesScreen> {
       ),
     );
   }
+}
+
+void showCurrenciesScreen(
+  BuildContext context, {
+  title = '',
+  void onSelected(Currency currency),
+  fiats = false,
+}) {
+  Navigator.of(context).push(
+    MaterialPageRoute(
+      builder: (_) {
+        return CurrenciesScreen(
+          fiats: fiats,
+          onSelected: onSelected,
+          title: title,
+        );
+      },
+    ),
+  );
 }

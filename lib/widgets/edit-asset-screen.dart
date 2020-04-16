@@ -7,6 +7,8 @@ import 'package:portfolio/model/user-preferences.dart';
 import 'package:portfolio/widgets/currencies-screen.dart';
 import 'package:provider/provider.dart';
 
+import 'currency-list-tile.dart';
+
 class EditAssetScreen extends StatefulWidget {
   final Asset asset;
 
@@ -159,24 +161,10 @@ class _EditAssetCurrencies extends StatelessWidget {
         elevation: 3,
         child: Column(
           children: [
-            ListTile(
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => CurrenciesScreen(
-                      onSelected: updateCrypto,
-                    ),
-                  ),
-                );
-              },
-              title: Text('Cryptocurrency'),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  crypto != null ? Text(crypto.name) : Text('Select'),
-                  Icon(Icons.chevron_right),
-                ],
-              ),
+            CurrencyListTile(
+              selectedCurrency: crypto,
+              onSelected: updateCrypto,
+              title: 'Cryptocurrency',
             ),
             Divider(height: 1),
             ListTile(

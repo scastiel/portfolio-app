@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:portfolio/model/user-preferences.dart';
+import 'package:portfolio/widgets/currencies-screen.dart';
 import 'package:provider/provider.dart';
 
 import '../model/currencies.dart';
+import 'currency-list-tile.dart';
 
 class SettingsScreen extends StatelessWidget {
   @override
@@ -86,71 +88,35 @@ class FiatSettings extends StatelessWidget {
   Widget build(BuildContext context) {
     final userPreferences = Provider.of<UserPreferences>(context);
     final currencies = Provider.of<Currencies>(context);
+    final pricesCurrency = currencies.getCurrency(userPreferences.pricesFiatId);
+    final holdingsCurrency =
+        currencies.getCurrency(userPreferences.holdingsFiatId);
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Card(
         elevation: 3,
         child: Column(
           children: [
-            ListTile(
-              title: Text('Currency for prices'),
-              trailing: CurrencyDropdownFormField(
-                currency: currencies.getCurrency(userPreferences.pricesFiatId),
-                onCurrencySelected: (fiat) {
-                  userPreferences.pricesFiatId = fiat.id;
-                },
-                fiats: true,
-              ),
+            CurrencyListTile(
+              selectedCurrency: pricesCurrency,
+              onSelected: (currency) {
+                userPreferences.pricesFiatId = currency.id;
+              },
+              title: 'Currency for prices',
+              fiats: true,
             ),
             Divider(height: 1),
-            ListTile(
-              title: Text('Currency for holdings'),
-              trailing: CurrencyDropdownFormField(
-                currency:
-                    currencies.getCurrency(userPreferences.holdingsFiatId),
-                onCurrencySelected: (fiat) {
-                  userPreferences.holdingsFiatId = fiat.id;
-                },
-                fiats: true,
-              ),
+            CurrencyListTile(
+              selectedCurrency: holdingsCurrency,
+              onSelected: (currency) {
+                userPreferences.holdingsFiatId = currency.id;
+              },
+              title: 'Currency for holdings',
+              fiats: true,
             ),
           ],
         ),
       ),
-    );
-  }
-}
-
-class CurrencyDropdownFormField extends StatelessWidget {
-  final Currency currency;
-  final void Function(Currency) onCurrencySelected;
-  final bool fiats;
-
-  const CurrencyDropdownFormField({
-    Key key,
-    @required this.currency,
-    @required this.fiats,
-    this.onCurrencySelected,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final currencies = Provider.of<Currencies>(context);
-    return DropdownButton(
-      value: currency,
-      items: (fiats ? currencies.fiats : currencies.cryptos)
-          .map(
-            (currency) => DropdownMenuItem(
-              value: currency,
-              child: Text(currency.symbol),
-            ),
-          )
-          .toList(),
-      onChanged: (newCurrency) {
-        if (onCurrencySelected != null) {
-          onCurrencySelected(newCurrency);
-        }
-      },
     );
   }
 }
