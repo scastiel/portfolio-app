@@ -6,14 +6,43 @@ import 'package:portfolio/model/portfolio.dart';
 import 'package:portfolio/model/user-preferences.dart';
 import 'package:provider/provider.dart';
 
-class EditAssetScreen extends StatelessWidget {
+class EditAssetScreen extends StatefulWidget {
   final Asset asset;
-  final TextEditingController _holdingsTextController;
 
-  EditAssetScreen({Key key, @required this.asset})
-      : _holdingsTextController =
-            TextEditingController(text: asset.amount.toString()),
-        super(key: key);
+  EditAssetScreen({Key key, @required this.asset}) : super(key: key);
+
+  @override
+  _EditAssetScreenState createState() => _EditAssetScreenState();
+}
+
+class _EditAssetScreenState extends State<EditAssetScreen> {
+  TextEditingController _holdingsTextController;
+  bool _error = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _holdingsTextController =
+        TextEditingController(text: widget.asset.amount.toString());
+  }
+
+  @override
+  void dispose() {
+    _holdingsTextController.dispose();
+    super.dispose();
+  }
+
+  double validateAndGetHoldings() {
+    final text = _holdingsTextController.text;
+    if (text.trim() == '') return 0;
+    final holdings = double.tryParse(text);
+    if (holdings == null) {
+      setState(() {
+        _error = true;
+      });
+    }
+    return holdings;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,13 +50,13 @@ class EditAssetScreen extends StatelessWidget {
       body: CustomScrollView(
         slivers: [
           _EditAssetAppBar(
-            asset: asset,
-            holdingsTextController: _holdingsTextController,
+            asset: widget.asset,
+            validateAndGetHoldings: validateAndGetHoldings,
           ),
           SliverList(
             delegate: SliverChildListDelegate([
               _EditAssetCurrencies(
-                asset: asset,
+                asset: widget.asset,
               ),
               Padding(
                 padding:
@@ -38,8 +67,9 @@ class EditAssetScreen extends StatelessWidget {
                         color: Theme.of(context).hintColor, fontSize: 13)),
               ),
               _EditAssetHoldings(
-                asset: asset,
+                asset: widget.asset,
                 holdingsTextController: _holdingsTextController,
+                error: _error,
               )
             ]),
           ),
@@ -53,11 +83,11 @@ class _EditAssetAppBar extends StatelessWidget {
   const _EditAssetAppBar({
     Key key,
     @required this.asset,
-    @required this.holdingsTextController,
+    @required this.validateAndGetHoldings,
   }) : super(key: key);
 
   final Asset asset;
-  final TextEditingController holdingsTextController;
+  final double Function() validateAndGetHoldings;
 
   @override
   Widget build(BuildContext context) {
@@ -74,9 +104,11 @@ class _EditAssetAppBar extends StatelessWidget {
           ),
           tooltip: 'Save',
           onPressed: () {
-            final amount = double.tryParse(holdingsTextController.text) ?? 0.0;
-            portfolio.updateAsset(asset.copyWith(amount: amount));
-            Navigator.of(context).pop();
+            final amount = validateAndGetHoldings();
+            if (amount != null) {
+              portfolio.updateAsset(asset.copyWith(amount: amount));
+              Navigator.of(context).pop();
+            }
           },
         ),
         IconButton(
@@ -135,10 +167,12 @@ class _EditAssetHoldings extends StatelessWidget {
     Key key,
     @required this.asset,
     @required this.holdingsTextController,
+    this.error = false,
   }) : super(key: key);
 
   final Asset asset;
   final TextEditingController holdingsTextController;
+  final bool error;
 
   @override
   Widget build(BuildContext context) {
@@ -159,6 +193,7 @@ class _EditAssetHoldings extends StatelessWidget {
                     decimal: true,
                     signed: false,
                   ),
+                  style: error ? TextStyle(color: Colors.red) : null,
                   decoration: InputDecoration(
                     border: InputBorder.none,
                     hintText: 'None',
