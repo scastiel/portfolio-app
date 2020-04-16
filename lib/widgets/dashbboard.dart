@@ -81,7 +81,7 @@ class _DashboardState extends State<Dashboard> {
             PortfolioAppBar(),
             SliverList(
               delegate: SliverChildListDelegate([
-                SummaryWrapper(),
+                ...(widget.portfolio.hasHoldings ? [SummaryWrapper()] : []),
                 DurationButtonBar(),
                 ..._assets.map(
                   (asset) => ReorderableItem(

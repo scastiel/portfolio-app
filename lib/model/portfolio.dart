@@ -25,6 +25,8 @@ class Portfolio extends ChangeNotifier {
 
   List<Asset> get assets => _assets;
 
+  bool get hasHoldings => _assets.any((asset) => asset.amount > 0);
+
   void updateAsset(Asset asset) {
     final index = _assets.indexWhere(
       (element) => element.currency == asset.currency,
