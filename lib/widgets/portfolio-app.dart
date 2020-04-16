@@ -70,6 +70,7 @@ _getTheme(ThemeData baseTheme) => baseTheme.copyWith(
         ),
         actionsIconTheme:
             baseTheme.iconTheme.copyWith(color: baseTheme.hintColor),
+        iconTheme: baseTheme.iconTheme.copyWith(color: baseTheme.hintColor),
       ),
     );
 

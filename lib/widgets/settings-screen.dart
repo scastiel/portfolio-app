@@ -99,6 +99,7 @@ class FiatSettings extends StatelessWidget {
                 onCurrencySelected: (fiat) {
                   userPreferences.pricesFiatId = fiat.id;
                 },
+                fiats: true,
               ),
             ),
             Divider(height: 1),
@@ -110,6 +111,7 @@ class FiatSettings extends StatelessWidget {
                 onCurrencySelected: (fiat) {
                   userPreferences.holdingsFiatId = fiat.id;
                 },
+                fiats: true,
               ),
             ),
           ],
@@ -122,10 +124,12 @@ class FiatSettings extends StatelessWidget {
 class CurrencyDropdownFormField extends StatelessWidget {
   final Currency currency;
   final void Function(Currency) onCurrencySelected;
+  final bool fiats;
 
   const CurrencyDropdownFormField({
     Key key,
     @required this.currency,
+    @required this.fiats,
     this.onCurrencySelected,
   }) : super(key: key);
 
@@ -134,7 +138,7 @@ class CurrencyDropdownFormField extends StatelessWidget {
     final currencies = Provider.of<Currencies>(context);
     return DropdownButton(
       value: currency,
-      items: currencies.fiats
+      items: (fiats ? currencies.fiats : currencies.cryptos)
           .map(
             (currency) => DropdownMenuItem(
               value: currency,

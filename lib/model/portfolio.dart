@@ -5,7 +5,15 @@ import 'currencies.dart';
 class Asset {
   final Currency currency;
   final double amount;
+
   const Asset({@required this.currency, @required this.amount});
+
+  Asset copyWith({Currency currency, double amount}) {
+    return Asset(
+      currency: currency ?? this.currency,
+      amount: amount ?? this.amount,
+    );
+  }
 }
 
 class Portfolio extends ChangeNotifier {

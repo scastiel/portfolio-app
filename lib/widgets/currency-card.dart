@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:portfolio/widgets/edit-asset-screen.dart';
 import 'package:provider/provider.dart';
 
 import '../model/portfolio.dart';
@@ -25,11 +26,20 @@ class CurrencyCard extends StatelessWidget {
       child: ButtonBar(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // FlatButton.icon(
-          //   icon: Icon(Icons.edit),
-          //   onPressed: () {},
-          //   label: Text('Edit'),
-          // ),
+          FlatButton.icon(
+            icon: Icon(Icons.edit),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => EditAssetScreen(asset: asset),
+                ),
+              );
+              Future.delayed(Duration(milliseconds: 100)).then((_) {
+                cancel();
+              });
+            },
+            label: Text('Edit'),
+          ),
           FlatButton.icon(
             icon: Icon(Icons.delete),
             onPressed: () async {
@@ -123,7 +133,7 @@ class RemoveAssetDialog extends StatelessWidget {
         ),
         new FlatButton(
           textColor: Colors.red,
-          child: new Text('Delete'),
+          child: new Text('Remove'),
           onPressed: () {
             onConfirm();
             Navigator.of(context).pop();
