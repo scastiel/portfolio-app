@@ -10,9 +10,11 @@ import 'currency-card.dart';
 
 class AssetCardWrapper extends StatelessWidget {
   final Asset asset;
+  final bool placeholderMode;
 
   const AssetCardWrapper({
     @required this.asset,
+    this.placeholderMode = false,
   });
 
   @override
@@ -23,6 +25,7 @@ class AssetCardWrapper extends StatelessWidget {
           asset: asset,
           pricesFetcher: pricesFetcher,
           userPreferences: userPreferences,
+          placeholderMode: placeholderMode,
         ),
       ),
     );
@@ -33,11 +36,13 @@ class _AssetCard extends StatefulWidget {
   final Asset asset;
   final PricesFetcher pricesFetcher;
   final UserPreferences userPreferences;
+  final bool placeholderMode;
 
   const _AssetCard({
     @required this.asset,
     @required this.pricesFetcher,
     @required this.userPreferences,
+    this.placeholderMode = false,
   });
 
   @override
@@ -124,7 +129,7 @@ class _AssetCardState extends State<_AssetCard> {
     return CurrencyCard(
       asset: widget.asset,
       price: _price,
-      history: _history,
+      history: widget.placeholderMode ? {} : _history,
       userPreferences: widget.userPreferences,
     );
   }

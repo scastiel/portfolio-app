@@ -40,4 +40,9 @@ class Portfolio extends ChangeNotifier {
     _assets.removeAt(index);
     notifyListeners();
   }
+
+  void reorderAssets(List<Asset> assets) {
+    _assets = assets;
+    notifyListeners();
+  }
 }

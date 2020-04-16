@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_reorderable_list/flutter_reorderable_list.dart';
 import 'package:portfolio/widgets/edit-asset-screen.dart';
 import 'package:provider/provider.dart';
 
@@ -23,51 +24,68 @@ class CurrencyCard extends StatelessWidget {
 
   Widget buildEditView(BuildContext context, void Function() cancel) {
     return Center(
-      child: ButtonBar(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          FlatButton.icon(
-            icon: Icon(Icons.edit),
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => EditAssetScreen(asset: asset),
-                ),
-              );
-              Future.delayed(Duration(milliseconds: 100)).then((_) {
-                cancel();
-              });
-            },
-            label: Text('Edit'),
-          ),
-          FlatButton.icon(
-            icon: Icon(Icons.delete),
-            onPressed: () async {
-              await showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return RemoveAssetDialog(
-                    asset: asset,
-                    onConfirm: () {
-                      final portfolio =
-                          Provider.of<Portfolio>(context, listen: false);
-                      portfolio.removeAsset(asset);
+      child: IconTheme(
+        data: IconThemeData(color: Theme.of(context).hintColor),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            ReorderableListener(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Icon(Icons.drag_handle),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ButtonBar(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconTextButton(
+                    icon: Icons.edit,
+                    title: 'Edit',
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => EditAssetScreen(asset: asset),
+                        ),
+                      );
+                      Future.delayed(Duration(milliseconds: 100)).then((_) {
+                        cancel();
+                      });
+                    },
+                  ),
+                  IconTextButton(
+                    icon: Icons.delete,
+                    title: 'Remove',
+                    onPressed: () async {
+                      await showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return RemoveAssetDialog(
+                            asset: asset,
+                            onConfirm: () {
+                              final portfolio = Provider.of<Portfolio>(context,
+                                  listen: false);
+                              portfolio.removeAsset(asset);
+                              cancel();
+                            },
+                          );
+                        },
+                      );
+                    },
+                  ),
+                  IconTextButton(
+                    icon: Icons.cancel,
+                    title: 'Cancel',
+                    onPressed: () {
                       cancel();
                     },
-                  );
-                },
-              );
-            },
-            label: Text('Remove'),
-          ),
-          FlatButton.icon(
-            icon: Icon(Icons.cancel),
-            onPressed: () {
-              cancel();
-            },
-            label: Text('Cancel'),
-          ),
-        ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -93,6 +111,45 @@ class CurrencyCard extends StatelessWidget {
           ? 'Holding: ${holdingValueFiat != null ? holdingValueFiat.toStringAsFixed(2) : '-'} ${holdingsFiat.symbol} (${asset.amount.toString()} ${asset.currency.symbol})'
           : null,
       buildEditView: buildEditView,
+    );
+  }
+}
+
+class IconTextButton extends StatelessWidget {
+  final String title;
+  final void Function() onPressed;
+  final IconData icon;
+
+  const IconTextButton({
+    Key key,
+    @required this.title,
+    @required this.onPressed,
+    @required this.icon,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onPressed,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(bottom: 2.0),
+              child: Icon(icon),
+            ),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 12,
+                color: Theme.of(context).hintColor,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

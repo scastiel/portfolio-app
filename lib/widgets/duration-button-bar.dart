@@ -11,7 +11,7 @@ class DurationButtonBar extends StatelessWidget {
     final userPreferences = Provider.of<UserPreferences>(context);
     final pricesFetcher = Provider.of<PricesFetcher>(context);
     return Padding(
-      padding: const EdgeInsets.only(top: 8.0),
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Transform(
         transform: new Matrix4.identity()..scale(0.75),
         alignment: Alignment.center,
