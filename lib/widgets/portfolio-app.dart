@@ -27,7 +27,7 @@ class PortfolioApp extends StatelessWidget {
       providers: [
         Provider<Currencies>(create: (_) => currencies),
         ChangeNotifierProvider<UserPreferences>(create: (_) => userPreferences),
-        Provider<Portfolio>(create: (_) => portfolio),
+        ChangeNotifierProvider<Portfolio>(create: (_) => portfolio),
         Provider<PricesFetcher>(create: (_) => pricesFetcher),
       ],
       child: const _App(),

@@ -20,6 +20,48 @@ class CurrencyCard extends StatelessWidget {
     @required this.userPreferences,
   });
 
+  Widget buildEditView(BuildContext context, void Function() cancel) {
+    return Center(
+      child: ButtonBar(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // FlatButton.icon(
+          //   icon: Icon(Icons.edit),
+          //   onPressed: () {},
+          //   label: Text('Edit'),
+          // ),
+          FlatButton.icon(
+            icon: Icon(Icons.delete),
+            onPressed: () async {
+              await showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return RemoveAssetDialog(
+                    asset: asset,
+                    onConfirm: () {
+                      final portfolio =
+                          Provider.of<Portfolio>(context, listen: false);
+                      portfolio.removeAsset(asset);
+                      cancel();
+                    },
+                  );
+                },
+              );
+            },
+            label: Text('Remove'),
+          ),
+          FlatButton.icon(
+            icon: Icon(Icons.cancel),
+            onPressed: () {
+              cancel();
+            },
+            label: Text('Cancel'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final currencies = Provider.of<Currencies>(context);
@@ -39,6 +81,55 @@ class CurrencyCard extends StatelessWidget {
       history: history,
       holdingText:
           'Holding: ${holdingValueFiat != null ? holdingValueFiat.toStringAsFixed(2) : '-'} ${holdingsFiat.symbol} (${asset.amount.toString()} ${asset.currency.symbol})',
+      buildEditView: buildEditView,
+    );
+  }
+}
+
+class RemoveAssetDialog extends StatelessWidget {
+  const RemoveAssetDialog({
+    Key key,
+    @required this.asset,
+    @required this.onConfirm,
+  }) : super(key: key);
+
+  final Asset asset;
+  final void Function() onConfirm;
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: new Text("Remove asset"),
+      content: RichText(
+        text: TextSpan(
+          text: 'Do you want to remove ',
+          style: Theme.of(context).textTheme.bodyText1,
+          children: <TextSpan>[
+            TextSpan(
+              text: asset.currency.name,
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            TextSpan(text: ' from your portfolio?'),
+          ],
+        ),
+      ),
+      actions: <Widget>[
+        // usually buttons at the bottom of the dialog
+        new FlatButton(
+          child: new Text('Cancel'),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+        new FlatButton(
+          textColor: Colors.red,
+          child: new Text('Delete'),
+          onPressed: () {
+            onConfirm();
+            Navigator.of(context).pop();
+          },
+        ),
+      ],
     );
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
 import '../model/currencies.dart';
@@ -12,15 +14,18 @@ class PriceCard extends StatefulWidget {
   final String holdingText;
   final Currency currency;
   final Currency fiat;
+  final Widget Function(BuildContext context, void Function() cancel)
+      buildEditView;
 
   const PriceCard({
     @required this.title,
     @required this.variation,
     @required this.priceText,
     @required this.history,
-    this.currency,
     @required this.fiat,
+    this.currency,
     this.holdingText,
+    this.buildEditView,
   });
 
   @override
@@ -32,6 +37,7 @@ class PriceCard extends StatefulWidget {
 class PriceCardState extends State<PriceCard> {
   bool _isExpanded;
   bool _animating;
+  bool _editMode = false;
 
   @override
   initState() {
@@ -40,10 +46,29 @@ class PriceCardState extends State<PriceCard> {
     _animating = false;
   }
 
+  @override
+  void didUpdateWidget(PriceCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (_editMode && _isExpanded) {
+      setState(() {
+        _isExpanded = false;
+        _animating = true;
+      });
+    }
+  }
+
   void onTap() {
+    if (!_editMode) {
+      setState(() {
+        _isExpanded = !_isExpanded;
+        _animating = true;
+      });
+    }
+  }
+
+  onLongPress() {
     setState(() {
-      _isExpanded = !_isExpanded;
-      _animating = true;
+      _editMode = true;
     });
   }
 
@@ -94,73 +119,90 @@ class PriceCardState extends State<PriceCard> {
           },
           child: ClipRRect(
             borderRadius: BorderRadius.all(Radius.circular(5)),
-            child: InkWell(
-              onTap: _isExpanded ? null : onTap,
-              child: Stack(
-                children: [
-                  ...((!_isExpanded && !_animating)
-                      ? [_buildBackgroundChart()]
-                      : []),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      InkWell(
-                        onTap: _isExpanded ? onTap : null,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  widget.title,
-                                  VariationText(widget.variation)
-                                ],
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                  left: 8.0, right: 8.0, bottom: 8.0),
-                              child: Text(
-                                widget.priceText,
-                                style: Theme.of(context).textTheme.headline6,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      ...(_isExpanded && !_animating
-                          ? [_buildDetailedChart()]
-                          : []),
-                      ...(!_isExpanded &&
-                              !_animating &&
-                              widget.holdingText != null
-                          ? [
-                              Padding(
-                                padding:
-                                    const EdgeInsets.only(left: 8.0, top: 14),
-                                child: Text(
-                                  widget.holdingText,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyText2
-                                      .copyWith(
-                                        fontSize: 11,
-                                        color: Theme.of(context).hintColor,
-                                      ),
-                                ),
-                              )
-                            ]
-                          : []),
-                    ],
-                  ),
-                ],
-              ),
+            child: Stack(
+              alignment: Alignment.center,
+              fit: StackFit.expand,
+              children: <Widget>[
+                buildNormalContent(context),
+                ...(_editMode && widget.buildEditView != null
+                    ? [buildEditContent()]
+                    : [])
+              ],
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget buildEditContent() {
+    return Container(
+      // decoration: BoxDecoration(color: Colors.red),
+      child: new BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+        child: widget.buildEditView(context, () {
+          setState(() {
+            _editMode = false;
+          });
+        }),
+      ),
+    );
+  }
+
+  Widget buildNormalContent(BuildContext context) {
+    return InkWell(
+      onTap: _isExpanded || _editMode ? null : onTap,
+      onLongPress: _isExpanded || _editMode ? null : onLongPress,
+      child: Stack(
+        children: [
+          ...((!_isExpanded && !_animating) ? [_buildBackgroundChart()] : []),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              InkWell(
+                onTap: _isExpanded ? onTap : null,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          widget.title,
+                          VariationText(widget.variation)
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(
+                          left: 8.0, right: 8.0, bottom: 8.0),
+                      child: Text(
+                        widget.priceText,
+                        style: Theme.of(context).textTheme.headline6,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              ...(_isExpanded && !_animating ? [_buildDetailedChart()] : []),
+              ...(!_isExpanded && !_animating && widget.holdingText != null
+                  ? [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 8.0, top: 14),
+                        child: Text(
+                          widget.holdingText,
+                          style: Theme.of(context).textTheme.bodyText2.copyWith(
+                                fontSize: 11,
+                                color: Theme.of(context).hintColor,
+                              ),
+                        ),
+                      )
+                    ]
+                  : []),
+            ],
+          ),
+        ],
       ),
     );
   }
