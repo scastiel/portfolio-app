@@ -96,7 +96,7 @@ class Portfolio extends ChangeNotifier {
 
   void initWithSharedPrefs({Currencies currencies}) async {
     final prefs = await SharedPreferences.getInstance();
-    final portfolioString = prefs.getString('portfolio___');
+    final portfolioString = prefs.getString('portfolio');
     if (portfolioString != null) {
       _initFromJson(jsonDecode(portfolioString), currencies: currencies);
     } else {
