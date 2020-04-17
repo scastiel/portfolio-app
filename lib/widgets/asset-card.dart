@@ -53,6 +53,8 @@ class _AssetCardState extends State<_AssetCard> {
   Price _price;
   Map<DateTime, double> _history;
   HistoryDuration _historyDuration;
+  String _pricesFiatId;
+  String _holdingsFiatId;
   bool _pricesFetcherInitialized = false;
   void Function() _unsubscribeFromCurrency;
   void Function() _unsubscribeFromHistoryForCurrency;
@@ -71,8 +73,21 @@ class _AssetCardState extends State<_AssetCard> {
   @override
   void didUpdateWidget(_AssetCard oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.userPreferences.historyDuration != _historyDuration) {
+    final newDuration =
+        widget.userPreferences.historyDuration != _historyDuration;
+    final newPricesFiatId =
+        widget.userPreferences.pricesFiatId != _pricesFiatId;
+    final newHoldingsFiatId =
+        widget.userPreferences.holdingsFiatId != _holdingsFiatId;
+    final newCurrency = widget.asset.currency != oldWidget.asset.currency;
+    if (newDuration || newCurrency || newPricesFiatId || newHoldingsFiatId) {
       _disposePricesFetcher();
+      setState(() {
+        if (newCurrency || newPricesFiatId) {
+          _price = null;
+        }
+        _history = null;
+      });
       _initPricesFetcher();
     }
   }
@@ -80,6 +95,8 @@ class _AssetCardState extends State<_AssetCard> {
   void _initPricesFetcher() {
     setState(() {
       _historyDuration = widget.userPreferences.historyDuration;
+      _pricesFiatId = widget.userPreferences.pricesFiatId;
+      _holdingsFiatId = widget.userPreferences.holdingsFiatId;
     });
     _unsubscribeFromCurrency = widget.pricesFetcher.subscribeForCurrency(
       widget.asset.currency,
