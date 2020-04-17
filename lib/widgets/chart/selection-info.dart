@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:portfolio/model/history-duration.dart';
+import 'package:portfolio/model/user-preferences.dart';
+import 'package:provider/provider.dart';
 
 import '../../helpers.dart';
 import '../../model/currencies.dart';
@@ -19,6 +22,8 @@ class SelectionInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final historyDuration =
+        Provider.of<UserPreferences>(context).historyDuration;
     return Padding(
       padding: const EdgeInsets.only(left: 8.0),
       child: Container(
@@ -36,7 +41,7 @@ class SelectionInfo extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                DateFormat.Hm().format(timeSeriesPrice.date),
+                getDateFormatter(historyDuration).format(timeSeriesPrice.date),
                 style: TextStyle(fontSize: 10),
               ),
               Text(
@@ -48,5 +53,24 @@ class SelectionInfo extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  DateFormat getDateFormatter(HistoryDuration historyDuration) {
+    switch (historyDuration) {
+      case HistoryDuration.day:
+        return DateFormat.Hm();
+      case HistoryDuration.threeDays:
+        return DateFormat.Hm();
+      case HistoryDuration.month:
+        return DateFormat.MMMMd().addPattern('\'at\'').add_Hm();
+      case HistoryDuration.threeMonths:
+        return DateFormat.MMMMd();
+      case HistoryDuration.sixMonths:
+        return DateFormat.yMMMMd();
+      case HistoryDuration.year:
+        return DateFormat.yMMMMd();
+      case HistoryDuration.twoYears:
+        return DateFormat.yMMMMd();
+    }
   }
 }
