@@ -131,9 +131,15 @@ class _EditAssetAppBar extends StatelessWidget {
             final amount = validateAndGetHoldings();
             if (crypto != null && amount != null) {
               if (asset != null) {
-                portfolio.updateAsset(asset.copyWith(amount: amount));
+                portfolio.updateAsset(asset.copyWith(
+                  currency: crypto,
+                  amount: amount,
+                ));
               } else {
-                portfolio.addAsset(Asset(currency: crypto, amount: amount));
+                portfolio.addAsset(Asset(
+                  currency: crypto,
+                  amount: amount,
+                ));
               }
               Navigator.of(context).pop();
             }

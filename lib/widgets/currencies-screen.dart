@@ -101,8 +101,16 @@ class _CurrenciesScreenState extends State<CurrenciesScreen> {
           final index = i ~/ 2;
           var currency = currenciesList[index];
           return ListTile(
-            title: Text(currency.name),
-            trailing: widget.showSymbols ? Text(currency.symbol) : null,
+            title: RichText(
+              text: _highlightSearch(currency.name),
+              overflow: TextOverflow.ellipsis,
+            ),
+            trailing: widget.showSymbols
+                ? RichText(
+                    text: _highlightSearch(currency.symbol),
+                    overflow: TextOverflow.ellipsis,
+                  )
+                : null,
             onTap: () {
               if (widget.onSelected != null) {
                 widget.onSelected(currency);
@@ -112,6 +120,33 @@ class _CurrenciesScreenState extends State<CurrenciesScreen> {
           );
         },
       ),
+    );
+  }
+
+  TextSpan _highlightSearch(String label) {
+    final style = Theme.of(context).textTheme.bodyText2;
+    final index = label.indexOf(new RegExp(_search, caseSensitive: false));
+    if (index == -1 || _search == '') {
+      return TextSpan(text: label, style: style);
+    }
+    final before = label.substring(0, index);
+    final highlight = label.substring(index, index + _search.length);
+    final after = label.substring(index + _search.length);
+    return TextSpan(
+      children: [
+        TextSpan(
+          text: before,
+          style: style,
+        ),
+        TextSpan(
+          text: highlight,
+          style: style.copyWith(fontWeight: FontWeight.bold),
+        ),
+        TextSpan(
+          text: after,
+          style: style,
+        ),
+      ],
     );
   }
 }
