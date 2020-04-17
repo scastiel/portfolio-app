@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:portfolio/coin-gecko-api.dart';
 import 'package:portfolio/widgets/edit-asset-screen.dart';
 import 'package:provider/provider.dart';
 
@@ -10,54 +11,71 @@ import '../model/portfolio.dart';
 import '../model/user-preferences.dart';
 import 'dashbboard.dart';
 
-class PortfolioApp extends StatelessWidget {
+class PortfolioApp extends StatefulWidget {
   @override
-  Widget build(BuildContext context) {
-    final currencies = Currencies.withFixtureData();
-    final portfolio = Portfolio();
-    portfolio.initWithSharedPrefs(currencies: currencies);
-    final userPreferences = UserPreferences();
-    userPreferences.initWithSharedPrefs();
+  _PortfolioAppState createState() => _PortfolioAppState();
+}
 
+class _PortfolioAppState extends State<PortfolioApp> {
+  UserPreferences _userPreferences;
+  Currencies _currencies;
+  Portfolio _portfolio;
+  PricesFetcher _pricesFetcher;
+  bool _initialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initCurrencies();
+  }
+
+  void _initCurrencies() async {
+    final userPreferences = UserPreferences();
+    await userPreferences.initWithSharedPrefs();
+    final api = CoinGeckoApi();
+    final currencies = Currencies(currencies: {
+      ...await api.fetchCurrencies(),
+      ...await api.fetchFiats(),
+    });
+    final portfolio = Portfolio();
+    await portfolio.initWithSharedPrefs(currencies: currencies);
     final pricesFetcher = CoinGeckoPricesFetcher(
       portfolio: portfolio,
       userPreferences: userPreferences,
     );
 
-    return MultiProvider(
-      providers: [
-        Provider<Currencies>(create: (_) => currencies),
-        ChangeNotifierProvider<UserPreferences>(create: (_) => userPreferences),
-        ChangeNotifierProvider<Portfolio>(create: (_) => portfolio),
-        Provider<PricesFetcher>(create: (_) => pricesFetcher),
-      ],
-      child: const _App(),
-    );
+    setState(() {
+      _userPreferences = userPreferences;
+      _currencies = currencies;
+      _portfolio = portfolio;
+      _pricesFetcher = pricesFetcher;
+      _initialized = true;
+    });
   }
-}
-
-class _App extends StatelessWidget {
-  const _App({
-    Key key,
-  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final userPreferences = Provider.of<UserPreferences>(context);
-    final portfolio = Provider.of<Portfolio>(context);
-    if (!userPreferences.initialized || !portfolio.initialized) {
-      return _LoadingScreen();
-    }
-    return MaterialApp(
-      title: 'Portfolio',
-      theme: _getTheme(ThemeData.light()),
-      darkTheme: _getTheme(ThemeData.dark()),
-      themeMode: userPreferences.appTheme,
-      home: Scaffold(
-        body: DashboardWrapper(),
-        floatingActionButton: AddAssetFloatingActionButton(),
-      ),
-    );
+    return _initialized
+        ? MultiProvider(
+            providers: [
+              Provider<Currencies>(create: (_) => _currencies),
+              ChangeNotifierProvider<UserPreferences>(
+                  create: (_) => _userPreferences),
+              ChangeNotifierProvider<Portfolio>(create: (_) => _portfolio),
+              Provider<PricesFetcher>(create: (_) => _pricesFetcher),
+            ],
+            child: MaterialApp(
+              title: 'Portfolio',
+              theme: _getTheme(ThemeData.light()),
+              darkTheme: _getTheme(ThemeData.dark()),
+              themeMode: _userPreferences.appTheme,
+              home: Scaffold(
+                body: DashboardWrapper(),
+                floatingActionButton: AddAssetFloatingActionButton(),
+              ),
+            ),
+          )
+        : _LoadingScreen();
   }
 }
 

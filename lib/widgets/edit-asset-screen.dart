@@ -183,6 +183,7 @@ class _EditAssetCurrencies extends StatelessWidget {
               onSelected: updateCrypto,
               title: 'Cryptocurrency',
               error: cryptoError,
+              showSymbolsInList: true,
             ),
             Divider(height: 1),
             ListTile(

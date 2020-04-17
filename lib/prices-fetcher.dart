@@ -25,9 +25,8 @@ class CoinGeckoPricesFetcher extends PricesFetcher {
   final UserPreferences userPreferences;
   final Portfolio portfolio;
 
-  Set<String> get currencyIds => (portfolio.initialized
-      ? portfolio.assets.map((asset) => asset.currency.id).toSet()
-      : <String>{});
+  Set<String> get currencyIds =>
+      portfolio.assets.map((asset) => asset.currency.id).toSet();
   Set<String> get fiatIds => {
         userPreferences.pricesFiatId,
         userPreferences.holdingsFiatId,
@@ -39,7 +38,7 @@ class CoinGeckoPricesFetcher extends PricesFetcher {
   CoinGeckoPricesFetcher({
     @required this.portfolio,
     @required this.userPreferences,
-  }) : api = CoinGeckoApi(userPreferences: userPreferences);
+  }) : api = CoinGeckoApi();
 
   Future<bool> _hasPrice(String currencyId) async {
     final prefs = await SharedPreferences.getInstance();
@@ -90,7 +89,10 @@ class CoinGeckoPricesFetcher extends PricesFetcher {
     String fiatId,
   ) async {
     final history = await api.fetchHistoryForCurrencyAndFiat(
-        currencyId: currencyId, fiatId: fiatId);
+      currencyId: currencyId,
+      fiatId: fiatId,
+      historyDuration: userPreferences.historyDuration,
+    );
     _historyObservers
         .where((o) => o.currencyId == currencyId && o.fiatId == fiatId)
         .forEach(

@@ -6,12 +6,14 @@ class CurrenciesScreen extends StatefulWidget {
   final bool fiats;
   final void Function(Currency currency) onSelected;
   final String title;
+  final bool showSymbols;
 
   const CurrenciesScreen({
     Key key,
     this.fiats = false,
     this.onSelected,
     this.title = '',
+    this.showSymbols = false,
   }) : super(key: key);
 
   @override
@@ -19,10 +21,8 @@ class CurrenciesScreen extends StatefulWidget {
 }
 
 class _CurrenciesScreenState extends State<CurrenciesScreen> {
-  static final emptyFilter = (_) => true;
-
   bool _searchMode = false;
-  bool Function(Currency) _filter = emptyFilter;
+  String _search = '';
 
   @override
   void initState() {
@@ -31,20 +31,42 @@ class _CurrenciesScreenState extends State<CurrenciesScreen> {
 
   onSearchChanged(String search) {
     setState(() {
-      if (search.trim() == '') _filter = emptyFilter;
-      _filter = (currency) =>
-          currency.name.toLowerCase().contains(search.trim().toLowerCase()) ||
-          currency.symbol.toLowerCase().contains(search.trim().toLowerCase());
+      _search = search.trim().toLowerCase();
     });
+  }
+
+  List<Currency> _getCurrenciesList(Currencies currencies) {
+    final list =
+        (widget.fiats ? currencies.fiats : currencies.cryptos).toList();
+    list.sort(
+        (c1, c2) => c1.name.toLowerCase().compareTo(c2.name.toLowerCase()));
+
+    if (_search == '') return list;
+
+    int _getCurrencyScore(Currency currency) {
+      final name = currency.name.toLowerCase();
+      final symbol = currency.symbol.toLowerCase();
+      if (name == _search) return 1;
+      if (symbol == _search) return 2;
+      if (name.startsWith(_search)) return 3;
+      if (symbol.startsWith(_search)) return 4;
+      if (name.contains(_search)) return 5;
+      if (symbol.contains(_search)) return 6;
+      return 0;
+    }
+
+    final results =
+        list.where((element) => _getCurrencyScore(element) > 0).toList();
+    results.sort(
+      (c1, c2) => _getCurrencyScore(c1).compareTo(_getCurrencyScore(c2)),
+    );
+    return results;
   }
 
   @override
   Widget build(BuildContext context) {
     final currencies = Provider.of<Currencies>(context);
-    final currenciesList =
-        (widget.fiats ? currencies.fiats : currencies.cryptos)
-            .where(_filter)
-            .toList();
+    final currenciesList = _getCurrenciesList(currencies);
     return Scaffold(
       appBar: AppBar(
         title: _searchMode
@@ -64,7 +86,7 @@ class _CurrenciesScreenState extends State<CurrenciesScreen> {
             onPressed: () {
               setState(() {
                 if (_searchMode) {
-                  _filter = emptyFilter;
+                  _search = '';
                 }
                 _searchMode = !_searchMode;
               });
@@ -80,6 +102,7 @@ class _CurrenciesScreenState extends State<CurrenciesScreen> {
           var currency = currenciesList[index];
           return ListTile(
             title: Text(currency.name),
+            trailing: widget.showSymbols ? Text(currency.symbol) : null,
             onTap: () {
               if (widget.onSelected != null) {
                 widget.onSelected(currency);
@@ -98,6 +121,7 @@ void showCurrenciesScreen(
   title = '',
   void onSelected(Currency currency),
   fiats = false,
+  showSymbols = false,
 }) {
   Navigator.of(context).push(
     MaterialPageRoute(
@@ -106,6 +130,7 @@ void showCurrenciesScreen(
           fiats: fiats,
           onSelected: onSelected,
           title: title,
+          showSymbols: showSymbols,
         );
       },
     ),

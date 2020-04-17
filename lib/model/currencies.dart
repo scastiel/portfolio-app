@@ -19,6 +19,15 @@ class Currency {
       : id = json['id'],
         name = json['name'],
         symbol = json['symbol'];
+
+  // Currency copyWith({
+  //   String id,
+  //   String name,
+  //   String symbol,
+  //   bool fiat = false,
+  // }) => Currency(
+  //   id:
+  // )
 }
 
 class Currencies {

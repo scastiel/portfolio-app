@@ -27,17 +27,14 @@ class Asset {
 
 class Portfolio extends ChangeNotifier {
   List<Asset> _assets;
-  bool _initialized = false;
 
   Portfolio({List<Asset> assets}) {
     _assets = assets;
   }
 
   List<Asset> get assets => _assets;
-  bool get initialized => _initialized;
 
-  bool get hasHoldings =>
-      _initialized && _assets.any((asset) => asset.amount > 0);
+  bool get hasHoldings => _assets.any((asset) => asset.amount > 0);
 
   int _indexOfAsset(Asset asset) {
     return _assets.indexWhere(
@@ -94,7 +91,7 @@ class Portfolio extends ChangeNotifier {
     prefs.setString('portfolio', jsonEncode(toJson()));
   }
 
-  void initWithSharedPrefs({Currencies currencies}) async {
+  Future<void> initWithSharedPrefs({Currencies currencies}) async {
     final prefs = await SharedPreferences.getInstance();
     final portfolioString = prefs.getString('portfolio');
     if (portfolioString != null) {
@@ -102,7 +99,6 @@ class Portfolio extends ChangeNotifier {
     } else {
       _assets = [];
     }
-    _initialized = true;
     notifyListeners();
   }
 }

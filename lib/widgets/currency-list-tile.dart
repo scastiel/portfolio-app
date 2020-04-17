@@ -9,6 +9,7 @@ class CurrencyListTile extends StatelessWidget {
   final String title;
   final bool fiats;
   final bool error;
+  final bool showSymbolsInList;
 
   const CurrencyListTile({
     Key key,
@@ -17,6 +18,7 @@ class CurrencyListTile extends StatelessWidget {
     this.title = '',
     this.fiats = false,
     this.error = false,
+    this.showSymbolsInList = false,
   }) : super(key: key);
 
   @override
@@ -28,6 +30,7 @@ class CurrencyListTile extends StatelessWidget {
           fiats: fiats,
           title: title,
           onSelected: onSelected,
+          showSymbols: showSymbolsInList,
         );
       },
       title: Text(title),

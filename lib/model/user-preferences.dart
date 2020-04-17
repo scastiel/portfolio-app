@@ -5,19 +5,17 @@ import 'theme-mode.dart';
 import 'history-duration.dart';
 
 class UserPreferences extends ChangeNotifier {
-  bool _initialized = false;
   String _pricesFiatId;
   String _holdingsFiatId;
   HistoryDuration _historyDuration;
   ThemeMode _appTheme;
 
-  bool get initialized => _initialized;
   String get pricesFiatId => _pricesFiatId;
   String get holdingsFiatId => _holdingsFiatId;
   HistoryDuration get historyDuration => _historyDuration;
   ThemeMode get appTheme => _appTheme;
 
-  void initWithSharedPrefs() async {
+  Future<void> initWithSharedPrefs() async {
     final prefs = await SharedPreferences.getInstance();
     _pricesFiatId = prefs.getString('prefs.pricesFiatId') ?? 'usd';
     _holdingsFiatId = prefs.getString('prefs.holdingsFiatId') ?? 'usd';
@@ -26,7 +24,6 @@ class UserPreferences extends ChangeNotifier {
             HistoryDuration.threeMonths;
     _appTheme =
         themeFromString(prefs.getString('prefs.appTheme')) ?? ThemeMode.system;
-    _initialized = true;
     notifyListeners();
   }
 
