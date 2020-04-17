@@ -13,6 +13,6 @@ class Price {
     if (fiatPrices.containsKey(fiatId)) {
       return fiatPrices[fiatId];
     }
-    throw ArgumentError('Invalid fiat currency ID: $fiatId');
+    return 0;
   }
 }

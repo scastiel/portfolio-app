@@ -7,12 +7,18 @@ class Currency {
   final String name;
   final String symbol;
   final bool fiat;
+
   const Currency({
     @required this.id,
     @required this.name,
     @required this.symbol,
     this.fiat = false,
   });
+
+  Currency.fromJson(Map<String, dynamic> json, {this.fiat = false})
+      : id = json['id'],
+        name = json['name'],
+        symbol = json['symbol'];
 }
 
 class Currencies {

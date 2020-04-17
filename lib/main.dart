@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-// import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'widgets/portfolio-app.dart';
 
@@ -17,13 +17,13 @@ class App extends StatefulWidget {
 }
 
 class _AppState extends State<App> {
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   SharedPreferences.getInstance().then((prefs) {
-  //     prefs.clear();
-  //   });
-  // }
+  @override
+  void initState() {
+    super.initState();
+    SharedPreferences.getInstance().then((prefs) {
+      prefs.clear();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
