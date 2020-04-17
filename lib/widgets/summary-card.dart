@@ -49,6 +49,10 @@ class _SummaryState extends State<_Summary> {
     super.initState();
   }
 
+  bool get _needsRefresh => widget.portfolio.assets.any((asset) =>
+      _prices[asset.currency.id] == null ||
+      _histories[asset.currency.id] == null);
+
   void _initPricesFetcher() {
     final pricesFetcher = Provider.of<PricesFetcher>(context);
     widget.portfolio.assets.forEach((asset) {
@@ -70,6 +74,13 @@ class _SummaryState extends State<_Summary> {
           },
         ),
       );
+
+      if (_needsRefresh) {
+        setState(() {
+          _histories = {};
+        });
+        pricesFetcher.refresh();
+      }
     });
   }
 
@@ -100,11 +111,7 @@ class _SummaryState extends State<_Summary> {
   void didUpdateWidget(_Summary oldWidget) {
     super.didUpdateWidget(oldWidget);
     _disposePricesFetcher();
-    setState(() {
-      _histories = {};
-    });
     _initPricesFetcher();
-    // }
   }
 
   bool get _pricesInitialized => widget.portfolio.assets

@@ -73,9 +73,6 @@ class _AssetCardState extends State<_AssetCard> {
     super.didUpdateWidget(oldWidget);
     if (widget.userPreferences.historyDuration != _historyDuration) {
       _disposePricesFetcher();
-      setState(() {
-        _history = null;
-      });
       _initPricesFetcher();
     }
   }
@@ -102,6 +99,9 @@ class _AssetCardState extends State<_AssetCard> {
         });
       },
     );
+    if (_price == null || _history == null) {
+      widget.pricesFetcher.refresh();
+    }
   }
 
   void _disposePricesFetcher() {
