@@ -3,6 +3,7 @@ import 'package:flutter_reorderable_list/flutter_reorderable_list.dart';
 import 'package:portfolio/widgets/edit-asset-screen.dart';
 import 'package:provider/provider.dart';
 
+import '../helpers.dart';
 import '../model/portfolio.dart';
 import '../model/currencies.dart';
 import '../model/price.dart';
@@ -104,11 +105,10 @@ class CurrencyCard extends StatelessWidget {
       currency: asset.currency,
       fiat: currencies.getCurrency(userPreferences.pricesFiatId),
       variation: price?.variation,
-      priceText:
-          '${priceFiat != null ? priceFiat.toStringAsFixed(2) : '-'} ${pricesFiat.symbol}',
+      priceText: formatPrice(priceFiat, currency: pricesFiat),
       history: history,
       holdingText: asset.amount > 0
-          ? 'Holding: ${holdingValueFiat != null ? holdingValueFiat.toStringAsFixed(2) : '-'} ${holdingsFiat.symbol} (${asset.amount.toString()} ${asset.currency.symbol})'
+          ? 'Holding: ${formatPrice(holdingValueFiat, currency: holdingsFiat)} (${asset.amount.toString()} ${asset.currency.symbol})'
           : null,
       buildEditView: buildEditView,
     );

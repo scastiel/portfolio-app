@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../helpers.dart';
 import '../model/currencies.dart';
 import '../model/portfolio.dart';
 import '../model/price.dart';
@@ -171,8 +172,7 @@ class _SummaryState extends State<_Summary> {
     return PriceCard(
       title: Text('Total value'),
       variation: _variation,
-      priceText:
-          '${_totalValue != null ? _totalValue.toStringAsFixed(2) : '-'} ${holdingsFiat.symbol}',
+      priceText: formatPrice(_totalValue, currency: holdingsFiat),
       history: _history,
       fiat: currencies.getCurrency(widget.userPreferences.holdingsFiatId),
     );

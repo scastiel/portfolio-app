@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../helpers.dart';
 import '../../model/currencies.dart';
 import 'time-series-price.dart';
 
@@ -39,7 +40,7 @@ class SelectionInfo extends StatelessWidget {
                 style: TextStyle(fontSize: 10),
               ),
               Text(
-                '${timeSeriesPrice.price.toStringAsFixed(2)} ${fiat.symbol}',
+                formatPrice(timeSeriesPrice.price, currency: fiat),
                 style: TextStyle(fontSize: 14),
               ),
             ],
