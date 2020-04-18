@@ -143,17 +143,19 @@ class _ChartWithSeriesState extends State<ChartWithSeries> {
               )
             ]
           : null,
-      behaviors: [
-        new charts.LinePointHighlighter(
-          showHorizontalFollowLine:
-              charts.LinePointHighlighterFollowLineType.none,
-          showVerticalFollowLine:
-              charts.LinePointHighlighterFollowLineType.nearest,
-        ),
-        new charts.SelectNearest(
-          eventTrigger: charts.SelectionTrigger.tapAndDrag,
-        ),
-      ],
+      behaviors: widget.detailed
+          ? [
+              new charts.LinePointHighlighter(
+                showHorizontalFollowLine:
+                    charts.LinePointHighlighterFollowLineType.none,
+                showVerticalFollowLine:
+                    charts.LinePointHighlighterFollowLineType.nearest,
+              ),
+              new charts.SelectNearest(
+                eventTrigger: charts.SelectionTrigger.tapAndDrag,
+              ),
+            ]
+          : null,
     );
   }
 
