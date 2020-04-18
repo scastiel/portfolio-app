@@ -104,6 +104,7 @@ class FiatSettings extends StatelessWidget {
               },
               title: 'Currency for prices',
               fiats: true,
+              showSymbolsInList: true,
             ),
             Divider(height: 1),
             CurrencyListTile(
@@ -113,6 +114,7 @@ class FiatSettings extends StatelessWidget {
               },
               title: 'Currency for holdings',
               fiats: true,
+              showSymbolsInList: true,
             ),
           ],
         ),
