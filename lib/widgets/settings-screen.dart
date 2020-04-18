@@ -50,20 +50,7 @@ class ThemeSettings extends StatelessWidget {
           children: [
             ListTile(
               title: Text('Theme'),
-              trailing: DropdownButton(
-                value: userPreferences.appTheme,
-                items: ThemeMode.values
-                    .map(
-                      (theme) => DropdownMenuItem(
-                        value: theme,
-                        child: Text(_getThemeLabel(theme)),
-                      ),
-                    )
-                    .toList(),
-                onChanged: (newTheme) {
-                  userPreferences.appTheme = newTheme;
-                },
-              ),
+              trailing: _buildThemeSelector(userPreferences),
             ),
           ],
         ),
@@ -71,10 +58,23 @@ class ThemeSettings extends StatelessWidget {
     );
   }
 
+  Widget _buildThemeSelector(UserPreferences userPreferences) {
+    final themeModes = [ThemeMode.system, ThemeMode.light, ThemeMode.dark];
+    return ToggleButtons(
+      children: themeModes.map((t) => Text(_getThemeLabel(t))).toList(),
+      constraints: BoxConstraints(minWidth: 64.0, minHeight: 32),
+      borderRadius: BorderRadius.all(Radius.circular(8)),
+      isSelected: themeModes.map((t) => userPreferences.appTheme == t).toList(),
+      onPressed: (index) {
+        userPreferences.appTheme = themeModes[index];
+      },
+    );
+  }
+
   String _getThemeLabel(ThemeMode theme) {
     switch (theme) {
       case ThemeMode.system:
-        return 'System';
+        return 'Auto';
       case ThemeMode.light:
         return 'Light';
       case ThemeMode.dark:
