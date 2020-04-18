@@ -32,13 +32,16 @@ class _PortfolioAppState extends State<PortfolioApp> {
   }
 
   onNetworkError(BuildContext context, {void Function() retry}) {
-    Scaffold.of(context).showSnackBar(
+    final scaffold = Scaffold.of(context);
+    scaffold.removeCurrentSnackBar();
+    scaffold.showSnackBar(
       SnackBar(
-        duration: Duration(hours: 1),
+        duration: Duration(seconds: 3),
         content: Text('There is a problem with your network.'),
         action: SnackBarAction(
           label: 'Retry',
           onPressed: () {
+            scaffold.hideCurrentSnackBar();
             retry();
           },
         ),
