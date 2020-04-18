@@ -1,7 +1,8 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:portfolio/model/user-preferences.dart';
-import 'package:portfolio/widgets/currencies-screen.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../model/currencies.dart';
 import 'currency-list-tile.dart';
@@ -28,8 +29,8 @@ class SettingsScreen extends StatelessWidget {
             automaticallyImplyLeading: false,
           ),
           SliverList(
-            delegate:
-                SliverChildListDelegate([ThemeSettings(), FiatSettings()]),
+            delegate: SliverChildListDelegate(
+                [ThemeSettings(), FiatSettings(), Legal(), AboutSection()]),
           ),
         ],
       ),
@@ -123,6 +124,41 @@ class FiatSettings extends StatelessWidget {
   }
 }
 
+class Legal extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Card(
+        elevation: 3,
+        child: Column(
+          children: [
+            ListTile(
+              title: Text('Terms and conditions'),
+              trailing: Icon(Icons.chevron_right),
+              onTap: () {
+                launch(
+                  'https://scastiel.github.io/portfolio-app/terms-and-conditions',
+                );
+              },
+            ),
+            Divider(height: 1),
+            ListTile(
+              title: Text('Privacy policy'),
+              trailing: Icon(Icons.chevron_right),
+              onTap: () {
+                launch(
+                  'https://scastiel.github.io/portfolio-app/privacy-policy',
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 Widget modalTransitionBuilder(
   BuildContext context,
   Animation<double> animation,
@@ -137,4 +173,71 @@ Widget modalTransitionBuilder(
     position: animation.drive(tween),
     child: child,
   );
+}
+
+class AboutSection extends StatelessWidget {
+  _linkRecognizer(uri) => new TapGestureRecognizer()..onTap = () => launch(uri);
+
+  TextSpan _text(BuildContext context, String text) {
+    return TextSpan(text: text);
+  }
+
+  TextSpan _newLine(BuildContext context) {
+    return _text(context, '\n\n');
+  }
+
+  TextSpan _link(BuildContext context, String text, String uri) {
+    return TextSpan(
+      text: text,
+      style: TextStyle(decoration: TextDecoration.underline),
+      recognizer: _linkRecognizer(uri),
+    );
+  }
+
+  TextSpan _strongLink(BuildContext context, String text, String uri) {
+    return TextSpan(
+      text: text,
+      style: TextStyle(
+        color: Theme.of(context).primaryColor,
+        fontWeight: FontWeight.bold,
+      ),
+      recognizer: _linkRecognizer(uri),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: <Widget>[
+          RichText(
+            textAlign: TextAlign.center,
+            text: TextSpan(
+              style: TextStyle(
+                color: Theme.of(context).hintColor,
+                fontSize: 11,
+              ),
+              children: [
+                TextSpan(
+                  children: [
+                    _text(context, 'Made with ❤️ by '),
+                    _strongLink(context, 'Sébastien Castiel',
+                        'https://blog.castiel.me'),
+                  ],
+                  style: TextStyle(fontSize: 15),
+                ),
+                _newLine(context),
+                _text(context, 'Price data is provided by '),
+                _link(context, 'CoinGecko.com', 'https://www.coingecko.com/'),
+                _newLine(context),
+                _text(context, 'Application icon from '),
+                _link(context, 'Vecteezy.com', 'https://www.vecteezy.com/'),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
