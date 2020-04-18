@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 
 import '../../model/currencies.dart';
 import 'chart-with-series.dart';
-import 'selection-info.dart';
 import 'time-series-price.dart';
 
 class PriceChart extends StatefulWidget {
@@ -72,6 +71,9 @@ class PriceChartState extends State<PriceChart> with WidgetsBindingObserver {
         data: widget.history.entries
             .map((entry) => TimeSeriesPrice(entry.key, entry.value))
             .toList(),
+        colorFn: (datum, index) => convertColor(Theme.of(context).primaryColor),
+        areaColorFn: (datum, index) =>
+            convertColor(Theme.of(context).primaryColor.withOpacity(0.1)),
       )
         ..setAttribute(charts.measureAxisIdKey, secondaryMeasureAxisId)
         ..setAttribute(charts.rendererIdKey, 'customArea')

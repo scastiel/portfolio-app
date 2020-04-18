@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:portfolio/coin-gecko-api.dart';
+import 'package:portfolio/themes.dart';
 import 'package:portfolio/widgets/edit-asset-screen.dart';
 import 'package:provider/provider.dart';
 
@@ -111,8 +112,8 @@ class _App extends StatelessWidget {
     final userPreferences = Provider.of<UserPreferences>(context);
     return MaterialApp(
       title: 'Portfolio',
-      theme: _getTheme(ThemeData.light()),
-      darkTheme: _getTheme(ThemeData.dark()),
+      theme: _getTheme(lightTheme),
+      darkTheme: _getTheme(darkTheme),
       themeMode: userPreferences.appTheme,
       home: Scaffold(
         body: DashboardWrapper(),
