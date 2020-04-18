@@ -64,18 +64,26 @@ class _PortfolioAppState extends State<PortfolioApp> {
               ChangeNotifierProvider<Portfolio>(create: (_) => _portfolio),
               Provider<PricesFetcher>(create: (_) => _pricesFetcher),
             ],
-            child: MaterialApp(
-              title: 'Portfolio',
-              theme: _getTheme(ThemeData.light()),
-              darkTheme: _getTheme(ThemeData.dark()),
-              themeMode: _userPreferences.appTheme,
-              home: Scaffold(
-                body: DashboardWrapper(),
-                floatingActionButton: AddAssetFloatingActionButton(),
-              ),
-            ),
+            child: _App(),
           )
         : _LoadingScreen();
+  }
+}
+
+class _App extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final userPreferences = Provider.of<UserPreferences>(context);
+    return MaterialApp(
+      title: 'Portfolio',
+      theme: _getTheme(ThemeData.light()),
+      darkTheme: _getTheme(ThemeData.dark()),
+      themeMode: userPreferences.appTheme,
+      home: Scaffold(
+        body: DashboardWrapper(),
+        floatingActionButton: AddAssetFloatingActionButton(),
+      ),
+    );
   }
 }
 

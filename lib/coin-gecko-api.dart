@@ -64,8 +64,10 @@ class CoinGeckoApi {
       (acc, currencyId) {
         final fiatPrices = fiatIds.fold(
           <String, double>{},
-          (prices, fiatId) =>
-              <String, double>{...prices, fiatId: result[currencyId][fiatId]},
+          (prices, fiatId) => <String, double>{
+            ...prices,
+            fiatId: 1.0 * result[currencyId][fiatId]
+          },
         );
 
         return <String, Price>{
