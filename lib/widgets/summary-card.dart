@@ -80,7 +80,7 @@ class _SummaryState extends State<_Summary> {
         setState(() {
           _histories = {};
         });
-        pricesFetcher.refresh();
+        pricesFetcher.refresh(context);
       }
     });
   }

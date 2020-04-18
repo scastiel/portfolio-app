@@ -28,7 +28,7 @@ class _PricesRefreshIndicatorState extends State<PricesRefreshIndicator> {
         setState(() {
           _isRefreshing = true;
         });
-        await pricesFetcher.refresh();
+        await pricesFetcher.refresh(context);
         setState(() {
           _isRefreshing = false;
         });

@@ -1,12 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter/material.dart';
 import 'package:portfolio/model/currencies.dart';
 
 import 'model/history-duration.dart';
 import 'model/price.dart';
-import 'model/user-preferences.dart';
 
 class BasicApi {
   static final httpClient = HttpClient();
@@ -39,11 +37,13 @@ class BasicApi {
       return result;
     } catch (err) {
       print('Error calling the API at $uri: $err');
+      throw err;
     }
   }
 }
 
 class CoinGeckoApi {
+  static final baseUri = 'api.coingecko.com';
   static final _api = BasicApi();
 
   Future<Map<String, Price>> fetchPrices({
@@ -52,7 +52,7 @@ class CoinGeckoApi {
   }) async {
     if (currencyIds.length == 0) return <String, Price>{};
 
-    final uri = Uri.https('api.coingecko.com', '/api/v3/simple/price', {
+    final uri = Uri.https(baseUri, '/api/v3/simple/price', {
       'ids': currencyIds.join(','),
       'vs_currencies': fiatIds.join(','),
       'include_24hr_change': 'true'
@@ -87,7 +87,7 @@ class CoinGeckoApi {
     HistoryDuration historyDuration,
   }) async {
     final uri = Uri.https(
-      'api.coingecko.com',
+      baseUri,
       '/api/v3/coins/$currencyId/market_chart',
       {'vs_currency': fiatId, 'days': getDays(historyDuration).toString()},
     );
@@ -102,7 +102,7 @@ class CoinGeckoApi {
   }
 
   Future<Set<Currency>> fetchCurrencies() async {
-    final uri = Uri.https('api.coingecko.com', '/api/v3/coins/list');
+    final uri = Uri.https(baseUri, '/api/v3/coins/list');
     final List result = await _api.call(uri);
     final currencies = result
         .map(
@@ -117,8 +117,7 @@ class CoinGeckoApi {
   }
 
   Future<Set<Currency>> fetchFiats() async {
-    final uri = Uri.https(
-        'api.coingecko.com', '/api/v3/simple/supported_vs_currencies');
+    final uri = Uri.https(baseUri, '/api/v3/simple/supported_vs_currencies');
     final List result = await _api.call(uri);
     return result
         .map(

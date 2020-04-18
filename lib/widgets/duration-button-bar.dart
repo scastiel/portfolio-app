@@ -27,7 +27,7 @@ class DurationButtonBar extends StatelessWidget {
                         userPreferences.historyDuration == historyDuration,
                     setSelected: () {
                       userPreferences.historyDuration = historyDuration;
-                      pricesFetcher.refresh();
+                      pricesFetcher.refresh(context);
                     },
                   ),
                 ),

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:portfolio/coin-gecko-api.dart';
@@ -22,6 +23,7 @@ class _PortfolioAppState extends State<PortfolioApp> {
   Portfolio _portfolio;
   PricesFetcher _pricesFetcher;
   bool _initialized = false;
+  bool _networkError = false;
 
   @override
   void initState() {
@@ -29,28 +31,50 @@ class _PortfolioAppState extends State<PortfolioApp> {
     _initCurrencies();
   }
 
-  void _initCurrencies() async {
-    final userPreferences = UserPreferences();
-    await userPreferences.initWithSharedPrefs();
-    final api = CoinGeckoApi();
-    final currencies = Currencies(currencies: {
-      ...await api.fetchCurrencies(),
-      ...await api.fetchFiats(),
-    });
-    final portfolio = Portfolio();
-    await portfolio.initWithSharedPrefs(currencies: currencies);
-    final pricesFetcher = CoinGeckoPricesFetcher(
-      portfolio: portfolio,
-      userPreferences: userPreferences,
+  onNetworkError(BuildContext context, {void Function() retry}) {
+    Scaffold.of(context).showSnackBar(
+      SnackBar(
+        duration: Duration(hours: 1),
+        content: Text('There is a problem with your network.'),
+        action: SnackBarAction(
+          label: 'Retry',
+          onPressed: () {
+            retry();
+          },
+        ),
+      ),
     );
+  }
 
-    setState(() {
-      _userPreferences = userPreferences;
-      _currencies = currencies;
-      _portfolio = portfolio;
-      _pricesFetcher = pricesFetcher;
-      _initialized = true;
-    });
+  void _initCurrencies() async {
+    try {
+      final userPreferences = UserPreferences();
+      await userPreferences.initWithSharedPrefs();
+      final api = CoinGeckoApi();
+      final currencies = Currencies(currencies: {
+        ...await api.fetchCurrencies(),
+        ...await api.fetchFiats(),
+      });
+      final portfolio = Portfolio();
+      await portfolio.initWithSharedPrefs(currencies: currencies);
+      final pricesFetcher = CoinGeckoPricesFetcher(
+        portfolio: portfolio,
+        userPreferences: userPreferences,
+        onNetworkError: onNetworkError,
+      );
+
+      setState(() {
+        _userPreferences = userPreferences;
+        _currencies = currencies;
+        _portfolio = portfolio;
+        _pricesFetcher = pricesFetcher;
+        _initialized = true;
+      });
+    } on SocketException catch (_) {
+      setState(() {
+        _networkError = true;
+      });
+    }
   }
 
   @override
@@ -66,7 +90,15 @@ class _PortfolioAppState extends State<PortfolioApp> {
             ],
             child: _App(),
           )
-        : _LoadingScreen();
+        : _LoadingScreen(
+            networkError: _networkError,
+            retry: () {
+              setState(() {
+                _networkError = false;
+                _initCurrencies();
+              });
+            },
+          );
   }
 }
 
@@ -122,12 +154,44 @@ _getTheme(ThemeData baseTheme) => baseTheme.copyWith(
     );
 
 class _LoadingScreen extends StatelessWidget {
+  final bool networkError;
+  final void Function() retry;
+
+  const _LoadingScreen({Key key, this.networkError = false, this.retry})
+      : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(color: Theme.of(context).primaryColor),
-      child: Center(
-        child: RefreshProgressIndicator(),
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: Container(
+        decoration: BoxDecoration(color: Theme.of(context).primaryColor),
+        child: Center(
+          child: networkError
+              ? Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: Text(
+                          'There seems to be a problem with your network.'),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 48.0),
+                      child: RaisedButton.icon(
+                        icon: Icon(Icons.refresh),
+                        onPressed: () {
+                          if (retry != null) {
+                            retry();
+                          }
+                        },
+                        label: Text('Retry'),
+                      ),
+                    ),
+                  ],
+                )
+              : RefreshProgressIndicator(),
+        ),
       ),
     );
   }

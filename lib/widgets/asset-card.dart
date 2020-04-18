@@ -117,7 +117,7 @@ class _AssetCardState extends State<_AssetCard> {
       },
     );
     if (_price == null || _history == null) {
-      widget.pricesFetcher.refresh();
+      widget.pricesFetcher.refresh(context);
     }
   }
 

@@ -15,7 +15,7 @@ abstract class PricesFetcher {
       Currency currency, void Function(Price) onUpdate);
   void Function() subscribeToHistoryForCurrency(String currencyId,
       String fiatId, void Function(Map<DateTime, double>) onUpdate);
-  Future<void> refresh();
+  Future<void> refresh(BuildContext context);
 }
 
 class CoinGeckoPricesFetcher extends PricesFetcher {
@@ -24,6 +24,8 @@ class CoinGeckoPricesFetcher extends PricesFetcher {
 
   final UserPreferences userPreferences;
   final Portfolio portfolio;
+  final void Function(BuildContext context, {void Function() retry})
+      onNetworkError;
 
   Set<String> get currencyIds =>
       portfolio.assets.map((asset) => asset.currency.id).toSet();
@@ -38,6 +40,7 @@ class CoinGeckoPricesFetcher extends PricesFetcher {
   CoinGeckoPricesFetcher({
     @required this.portfolio,
     @required this.userPreferences,
+    this.onNetworkError,
   }) : api = CoinGeckoApi();
 
   Future<bool> _hasPrice(String currencyId) async {
@@ -68,44 +71,57 @@ class CoinGeckoPricesFetcher extends PricesFetcher {
     prefs.setDouble('$currencyId-variation', price.variation);
   }
 
-  Future<void> _fetchPrices() async {
-    final prices = await api.fetchPrices(
-      currencyIds: currencyIds,
-      fiatIds: fiatIds,
-    );
-    currencyIds.forEach(
-      (currencyId) {
-        _setPrice(
-          currencyId,
-          prices[currencyId],
-        );
-      },
-    );
+  Future<void> _fetchPrices(BuildContext context) async {
+    try {
+      final prices = await api.fetchPrices(
+        currencyIds: currencyIds,
+        fiatIds: fiatIds,
+      );
+      currencyIds.forEach(
+        (currencyId) {
+          _setPrice(
+            currencyId,
+            prices[currencyId],
+          );
+        },
+      );
+    } on SocketException catch (_) {
+      onNetworkError(context, retry: () {
+        refresh(context);
+      });
+    }
     _notifyObservers();
   }
 
   Future<void> _fetchHistoryForCurrencyAndFiat(
+    BuildContext context,
     String currencyId,
     String fiatId,
   ) async {
-    final history = await api.fetchHistoryForCurrencyAndFiat(
-      currencyId: currencyId,
-      fiatId: fiatId,
-      historyDuration: userPreferences.historyDuration,
-    );
-    _historyObservers
-        .where((o) => o.currencyId == currencyId && o.fiatId == fiatId)
-        .forEach(
-      (observer) {
-        observer.onUpdate(history);
-      },
-    );
+    try {
+      final history = await api.fetchHistoryForCurrencyAndFiat(
+        currencyId: currencyId,
+        fiatId: fiatId,
+        historyDuration: userPreferences.historyDuration,
+      );
+      _historyObservers
+          .where((o) => o.currencyId == currencyId && o.fiatId == fiatId)
+          .forEach(
+        (observer) {
+          observer.onUpdate(history);
+        },
+      );
+    } on SocketException catch (_) {
+      onNetworkError(context, retry: () {
+        refresh(context);
+      });
+    }
   }
 
-  void _fetchHistory() {
+  void _fetchHistory(BuildContext context) {
     for (final currencyId in currencyIds) {
       for (final fiatId in fiatIds) {
-        _fetchHistoryForCurrencyAndFiat(currencyId, fiatId);
+        _fetchHistoryForCurrencyAndFiat(context, currencyId, fiatId);
       }
     }
   }
@@ -142,9 +158,9 @@ class CoinGeckoPricesFetcher extends PricesFetcher {
   }
 
   @override
-  Future<void> refresh() async {
-    await _fetchPrices();
-    _fetchHistory();
+  Future<void> refresh(BuildContext context) async {
+    await _fetchPrices(context);
+    _fetchHistory(context);
   }
 
   @override
