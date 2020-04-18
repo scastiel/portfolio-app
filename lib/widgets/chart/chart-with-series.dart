@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
+import 'package:portfolio/model/currencies.dart';
+import 'package:portfolio/widgets/chart/selection-info.dart';
 
 import 'time-series-price.dart';
 
@@ -12,20 +14,23 @@ charts.Color convertColor(Color color) {
   );
 }
 
-class ChartWithSeries extends StatelessWidget {
+class ChartWithSeries extends StatefulWidget {
   final bool detailed;
   final List<charts.Series<TimeSeriesPrice, DateTime>> seriesList;
   final charts.NumericExtents viewport;
-  final void Function(TimeSeriesPrice timeSeriesPrice) onSelectionChanged;
   final Brightness brightness;
+
+  final Currency currency;
+  final Currency fiat;
 
   const ChartWithSeries({
     Key key,
     this.detailed = false,
     @required this.seriesList,
     @required this.viewport,
-    this.onSelectionChanged,
     this.brightness = Brightness.light,
+    @required this.currency,
+    @required this.fiat,
   }) : super(key: key);
 
   static final detailedSeriesRenderer = charts.LineRendererConfig<DateTime>(
@@ -38,20 +43,47 @@ class ChartWithSeries extends StatelessWidget {
     includeLine: false,
   );
 
-  ThemeData get _theme =>
-      brightness == Brightness.light ? ThemeData.light() : ThemeData.dark();
+  @override
+  _ChartWithSeriesState createState() => _ChartWithSeriesState();
+}
+
+class _ChartWithSeriesState extends State<ChartWithSeries> {
+  TimeSeriesPrice _selectedTimeSeriesPrice;
+
+  ThemeData get _theme => widget.brightness == Brightness.light
+      ? ThemeData.light()
+      : ThemeData.dark();
+
   charts.Color get _labelColor => convertColor(_theme.hintColor);
+
   charts.Color get _lineColor => convertColor(_theme.dividerColor);
 
   @override
   Widget build(BuildContext context) {
+    return Stack(children: [
+      _buildChart(context),
+      ...(_selectedTimeSeriesPrice != null
+          ? [
+              SelectionInfo(
+                timeSeriesPrice: _selectedTimeSeriesPrice,
+                currency: widget.currency,
+                fiat: widget.fiat,
+              )
+            ]
+          : []),
+    ]);
+  }
+
+  Widget _buildChart(BuildContext context) {
     return charts.TimeSeriesChart(
-      seriesList,
+      widget.seriesList,
       animate: false,
       customSeriesRenderers: [
-        detailed ? detailedSeriesRenderer : notDetailedSeriesRenderer
+        widget.detailed
+            ? ChartWithSeries.detailedSeriesRenderer
+            : ChartWithSeries.notDetailedSeriesRenderer
       ],
-      layoutConfig: detailed
+      layoutConfig: widget.detailed
           ? charts.LayoutConfig(
               bottomMarginSpec: charts.MarginSpec.fixedPixel(20),
               topMarginSpec: charts.MarginSpec.fixedPixel(0),
@@ -64,14 +96,14 @@ class ChartWithSeries extends StatelessWidget {
               rightMarginSpec: charts.MarginSpec.fixedPixel(0),
               leftMarginSpec: charts.MarginSpec.fixedPixel(0),
             ),
-      defaultInteractions: detailed,
+      defaultInteractions: widget.detailed,
       primaryMeasureAxis:
           new charts.NumericAxisSpec(renderSpec: charts.NoneRenderSpec()),
       secondaryMeasureAxis: new charts.NumericAxisSpec(
         tickProviderSpec:
             charts.BasicNumericTickProviderSpec(desiredTickCount: 5),
         showAxisLine: false,
-        renderSpec: detailed
+        renderSpec: widget.detailed
             ? new charts.SmallTickRendererSpec(
                 labelStyle: charts.TextStyleSpec(
                   fontSize: 8,
@@ -83,11 +115,11 @@ class ChartWithSeries extends StatelessWidget {
                 minimumPaddingBetweenLabelsPx: 5,
               )
             : new charts.NoneRenderSpec(),
-        viewport: viewport,
+        viewport: widget.viewport,
       ),
       domainAxis: new charts.DateTimeAxisSpec(
         showAxisLine: false,
-        renderSpec: detailed
+        renderSpec: widget.detailed
             ? new charts.SmallTickRendererSpec(
                 labelOffsetFromAxisPx: 10,
                 tickLengthPx: 5,
@@ -102,15 +134,22 @@ class ChartWithSeries extends StatelessWidget {
               )
             : new charts.NoneRenderSpec(),
       ),
-      selectionModels: detailed
+      selectionModels: widget.detailed
           ? [
               new charts.SelectionModelConfig(
                 type: charts.SelectionModelType.info,
                 changedListener: _onSelectionChanged,
+                // changedListener: (_) {},
               )
             ]
           : null,
       behaviors: [
+        new charts.LinePointHighlighter(
+          showHorizontalFollowLine:
+              charts.LinePointHighlighterFollowLineType.none,
+          showVerticalFollowLine:
+              charts.LinePointHighlighterFollowLineType.nearest,
+        ),
         new charts.SelectNearest(
           eventTrigger: charts.SelectionTrigger.tapAndDrag,
         ),
@@ -119,8 +158,8 @@ class ChartWithSeries extends StatelessWidget {
   }
 
   _onSelectionChanged(charts.SelectionModel model) {
-    if (onSelectionChanged != null) {
-      onSelectionChanged(model.selectedDatum.first?.datum);
-    }
+    setState(() {
+      _selectedTimeSeriesPrice = model.selectedDatum.first?.datum;
+    });
   }
 }

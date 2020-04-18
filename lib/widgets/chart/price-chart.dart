@@ -31,7 +31,6 @@ class PriceChart extends StatefulWidget {
 class PriceChartState extends State<PriceChart> with WidgetsBindingObserver {
   static const secondaryMeasureAxisId = 'secondaryMeasureAxisId';
 
-  TimeSeriesPrice _selectedTimeSeriesPrice;
   Brightness _brightness;
 
   @override
@@ -77,35 +76,17 @@ class PriceChartState extends State<PriceChart> with WidgetsBindingObserver {
         ..setAttribute(charts.measureAxisIdKey, secondaryMeasureAxisId)
         ..setAttribute(charts.rendererIdKey, 'customArea')
     ];
-    return Stack(
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(bottom: 4.0),
-          child: ChartWithSeries(
-            seriesList: seriesList,
-            viewport: _getViewport(widget.history),
-            detailed: widget.detailed,
-            onSelectionChanged: _onSelectionChanged,
-            brightness: _brightness,
-          ),
-        ),
-        ...(_selectedTimeSeriesPrice != null
-            ? [
-                SelectionInfo(
-                  timeSeriesPrice: _selectedTimeSeriesPrice,
-                  currency: widget.currency,
-                  fiat: widget.fiat,
-                )
-              ]
-            : []),
-      ],
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4.0),
+      child: ChartWithSeries(
+        seriesList: seriesList,
+        viewport: _getViewport(widget.history),
+        detailed: widget.detailed,
+        brightness: _brightness,
+        fiat: widget.fiat,
+        currency: widget.currency,
+      ),
     );
-  }
-
-  _onSelectionChanged(TimeSeriesPrice selectedTimeSeries) {
-    setState(() {
-      _selectedTimeSeriesPrice = selectedTimeSeries;
-    });
   }
 
   charts.NumericExtents _getViewport(Map<DateTime, double> history) {
