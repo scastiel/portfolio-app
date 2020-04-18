@@ -11,6 +11,7 @@ import '../prices-fetcher.dart';
 import '../model/currencies.dart';
 import '../model/portfolio.dart';
 import '../model/user-preferences.dart';
+import 'animated-logo.dart';
 import 'dashbboard.dart';
 
 class PortfolioApp extends StatefulWidget {
@@ -66,6 +67,8 @@ class _PortfolioAppState extends State<PortfolioApp> {
         userPreferences: userPreferences,
         onNetworkError: onNetworkError,
       );
+
+      await Future.delayed(Duration(seconds: 1));
 
       setState(() {
         _userPreferences = userPreferences;
@@ -194,7 +197,7 @@ class _LoadingScreen extends StatelessWidget {
                     ),
                   ],
                 )
-              : RefreshProgressIndicator(),
+              : AnimatedLogo(),
         ),
       ),
     );
