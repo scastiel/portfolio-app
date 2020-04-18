@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:portfolio/model/currencies.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'model/history-duration.dart';
 import 'model/price.dart';
@@ -11,34 +12,44 @@ class BasicApi {
 
   Map<Uri, Future> _debouncedApiCalls = {};
 
-  Future call(Uri uri) {
+  Future call(Uri uri, {bool withCache = false}) {
     if (_debouncedApiCalls.containsKey(uri)) return _debouncedApiCalls[uri];
-    var result = _rawCall(uri);
+    var result = _rawCall(uri, withCache: withCache);
     _debouncedApiCalls[uri] = result;
     Future.delayed(Duration(milliseconds: 100))
         .then((_) => _debouncedApiCalls.remove(uri));
     return result;
   }
 
-  Future _rawCall(Uri uri) async {
-    print('Calling $uri…');
-    try {
-      final request = await httpClient.getUrl(uri);
-      final response = await request.close();
-      var json = '';
-      await for (final chunk in response.transform(Utf8Decoder())) {
-        json += chunk;
+  Future _rawCall(Uri uri, {bool withCache = false}) async {
+    String json;
+    final prefs = await SharedPreferences.getInstance();
+    final key = 'cache:${uri.toString()}';
+
+    if (withCache && prefs.containsKey(key)) {
+      print('Getting from cache $uri…');
+      json = prefs.getString(key);
+    } else {
+      try {
+        print('Calling $uri…');
+        final request = await httpClient.getUrl(uri);
+        final response = await request.close();
+        json = '';
+        await for (final chunk in response.transform(Utf8Decoder())) {
+          json += chunk;
+        }
+      } catch (err) {
+        print('Error calling the API at $uri: $err');
+        throw err;
       }
-      // if (json == 'Throttled') {
-      //   await Future.delayed(Duration(seconds: 1));
-      //   return await _rawCall(uri);
-      // }
-      final result = JsonCodec().decode(json);
-      return result;
-    } catch (err) {
-      print('Error calling the API at $uri: $err');
-      throw err;
     }
+
+    if (withCache) {
+      prefs.setString(key, json);
+    }
+
+    final result = JsonCodec().decode(json);
+    return result;
   }
 }
 
@@ -103,7 +114,7 @@ class CoinGeckoApi {
 
   Future<Set<Currency>> fetchCurrencies() async {
     final uri = Uri.https(baseUri, '/api/v3/coins/list');
-    final List result = await _api.call(uri);
+    final List result = await _api.call(uri, withCache: true);
     final currencies = result
         .map(
           (coin) => Currency(
@@ -118,7 +129,7 @@ class CoinGeckoApi {
 
   Future<Set<Currency>> fetchFiats() async {
     final uri = Uri.https(baseUri, '/api/v3/simple/supported_vs_currencies');
-    final List result = await _api.call(uri);
+    final List result = await _api.call(uri, withCache: true);
     return result
         .map(
           (symbol) => Currency(
