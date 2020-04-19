@@ -1,16 +1,32 @@
-# portfolio
+With your portfolio, keep an eye on your crypto prices and holdings value, in a beautiful and minimalistic application.
 
-A new Flutter project.
+<p align="center"><a href="https://apps.apple.com/ca/app/my-crypto-portfolio/id1508812091" rel="nofollow"><img src="store-material/download-app-store.svg" alt="Get it on the App Store"></a></p>
 
-## Getting Started
+<p align="center"><img width="230" src="store-material/device-pictures/light.png" alt="Get it on the App Store"><img width="230" src="store-material/device-pictures/dark.png" alt="Get it on the App Store"></p>
 
-This project is a starting point for a Flutter application.
+## Features
 
-A few resources to get you started if this is your first Flutter project:
+- Keep eye on all your cryptoassets prices, and the value of your holdings in your portfolio.
+- Enter each cryptocurrency you want, whether you own some of it or just want to keep an eye on its price.
+- Watch the value of all your assets individually or the total value of your portfolio.
+- Display charts of crypto prices or your holdings’ value.
+- See the prices in a currency and your portfolio value in another.
 
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
+### In the future…
 
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- Synchronize across several devices by creating an account.
+- Display other information, such as market cap or daily trading volumes.
+
+## Technical stack & credits
+
+- The application is built with [Flutter](https://flutter.dev/).
+- Data is provided by [CoinGecko](https://www.coingecko.com/).
+- App logo was created from an image from [Vecteezy](https://www.vecteezy.com/).
+
+## Contribute
+
+Feel free to request features or report bugs by [submitting an issue](https://gitlab.com/scastiel/portfolio-app/issues) or even pull-requests if you want to contribute in any way 😊.
+
+## Licence
+
+Published under the GNU GPL v3 (see [LICENSE](https://github.com/scastiel/portfolio-app/blob/master/LICENSE)).
