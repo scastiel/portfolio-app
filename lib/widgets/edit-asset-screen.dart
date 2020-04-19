@@ -1,9 +1,11 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:portfolio/model/currencies.dart';
 import 'package:portfolio/model/portfolio.dart';
 import 'package:portfolio/model/user-preferences.dart';
+import 'package:portfolio/widgets/settings-screen.dart';
 import 'package:provider/provider.dart';
 
 import 'currency-list-tile.dart';
@@ -60,6 +62,20 @@ class _EditAssetScreenState extends State<EditAssetScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final currencies = Provider.of<Currencies>(context);
+    final userPreferences = Provider.of<UserPreferences>(context);
+    final priceFiat = currencies.getCurrency(userPreferences.pricesFiatId);
+    final holdingFiat = currencies.getCurrency(userPreferences.holdingsFiatId);
+
+    TextSpan _bold(String text) => TextSpan(
+          text: text,
+          style: TextStyle(fontWeight: FontWeight.bold),
+        );
+    TextSpan _text(String text) => TextSpan(
+          text: text,
+        );
+    TextSpan _newLine() => TextSpan(text: '\n\n');
+
     return Scaffold(
       body: CustomScrollView(
         slivers: [
@@ -91,7 +107,42 @@ class _EditAssetScreenState extends State<EditAssetScreen> {
               _EditAssetHoldings(
                 holdingsTextController: _holdingsTextController,
                 error: _error,
-              )
+              ),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                child: RichText(
+                  text: TextSpan(
+                    style: TextStyle(
+                        color: Theme.of(context).hintColor, fontSize: 13),
+                    children: [
+                      ...(holdingFiat == priceFiat
+                          ? [
+                              _text(
+                                  'The price and your holdings value will be displayed in '),
+                              _bold(holdingFiat.name),
+                              _text('.'),
+                            ]
+                          : [
+                              _text('The price will be displayed in '),
+                              _bold(priceFiat.name),
+                              _text(' and your holdings value in '),
+                              _bold(holdingFiat.name),
+                              _text('.'),
+                            ]),
+                      _newLine(),
+                      _text('Change this globally in the '),
+                      TextSpan(
+                        text: 'Settings',
+                        style: TextStyle(color: Theme.of(context).primaryColor),
+                        recognizer: TapGestureRecognizer()
+                          ..onTap = () => openSettings(context),
+                      ),
+                      _text('.'),
+                    ],
+                  ),
+                ),
+              ),
             ]),
           ),
         ],
@@ -175,9 +226,6 @@ class _EditAssetCurrencies extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final currencies = Provider.of<Currencies>(context);
-    final userPreferences = Provider.of<UserPreferences>(context);
-    final fiat = currencies.getCurrency(userPreferences.pricesFiatId);
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Card(
@@ -190,11 +238,6 @@ class _EditAssetCurrencies extends StatelessWidget {
               title: 'Cryptocurrency',
               error: cryptoError,
               showSymbolsInList: true,
-            ),
-            Divider(height: 1),
-            ListTile(
-              title: Text('Fiat to display price'),
-              trailing: Text(fiat.name),
             ),
           ],
         ),
@@ -237,7 +280,10 @@ class _EditAssetHoldings extends StatelessWidget {
                     decimal: true,
                     signed: false,
                   ),
-                  style: error ? TextStyle(color: Colors.red) : null,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: error ? Colors.red : null,
+                  ),
                   decoration: InputDecoration(
                     border: InputBorder.none,
                     hintText: 'None',

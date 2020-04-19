@@ -159,7 +159,7 @@ class Legal extends StatelessWidget {
   }
 }
 
-Widget modalTransitionBuilder(
+Widget _modalTransitionBuilder(
   BuildContext context,
   Animation<double> animation,
   Animation<double> secondaryAnimation,
@@ -172,6 +172,15 @@ Widget modalTransitionBuilder(
   return SlideTransition(
     position: animation.drive(tween),
     child: child,
+  );
+}
+
+void openSettings(context) {
+  Navigator.of(context).push(
+    PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => SettingsScreen(),
+      transitionsBuilder: _modalTransitionBuilder,
+    ),
   );
 }
 

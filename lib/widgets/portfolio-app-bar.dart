@@ -12,13 +12,7 @@ class PortfolioAppBar extends StatelessWidget {
           icon: Icon(Icons.settings),
           tooltip: 'Settings',
           onPressed: () {
-            Navigator.of(context).push(
-              PageRouteBuilder(
-                pageBuilder: (context, animation, secondaryAnimation) =>
-                    SettingsScreen(),
-                transitionsBuilder: modalTransitionBuilder,
-              ),
-            );
+            openSettings(context);
           },
         ),
       ],
