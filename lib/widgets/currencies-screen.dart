@@ -21,7 +21,6 @@ class CurrenciesScreen extends StatefulWidget {
 }
 
 class _CurrenciesScreenState extends State<CurrenciesScreen> {
-  bool _searchMode = false;
   String _search = '';
 
   @override
@@ -69,30 +68,15 @@ class _CurrenciesScreenState extends State<CurrenciesScreen> {
     final currenciesList = _getCurrenciesList(currencies);
     return Scaffold(
       appBar: AppBar(
-        title: _searchMode
-            ? TextField(
-                autofocus: true,
-                autocorrect: false,
-                decoration: InputDecoration(
-                  hintText: 'Search…',
-                  isDense: true,
-                ),
-                onChanged: onSearchChanged,
-              )
-            : Text(widget.title),
-        actions: [
-          IconButton(
-            icon: _searchMode ? Icon(Icons.close) : Icon(Icons.search),
-            onPressed: () {
-              setState(() {
-                if (_searchMode) {
-                  _search = '';
-                }
-                _searchMode = !_searchMode;
-              });
-            },
-          )
-        ],
+        title: TextField(
+          autofocus: true,
+          autocorrect: false,
+          decoration: InputDecoration(
+            hintText: 'Search…',
+            isDense: true,
+          ),
+          onChanged: onSearchChanged,
+        ),
       ),
       body: ListView.builder(
         itemCount: currenciesList.length * 2,
