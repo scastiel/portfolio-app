@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_reorderable_list/flutter_reorderable_list.dart';
+import 'package:portfolio/model/history.dart';
 import 'package:portfolio/widgets/edit-asset-screen.dart';
 import 'package:provider/provider.dart';
 
@@ -13,7 +14,7 @@ import 'price-card.dart';
 class CurrencyCard extends StatelessWidget {
   final Asset asset;
   final Price price;
-  final Map<DateTime, double> history;
+  final Map<DateTime, History> history;
   final UserPreferences userPreferences;
 
   const CurrencyCard({

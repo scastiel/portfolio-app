@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:portfolio/model/history-duration.dart';
+import 'package:portfolio/model/history.dart';
 import 'package:provider/provider.dart';
 
 import '../model/price.dart';
@@ -51,7 +52,7 @@ class _AssetCard extends StatefulWidget {
 
 class _AssetCardState extends State<_AssetCard> {
   Price _price;
-  Map<DateTime, double> _history;
+  Map<DateTime, History> _history;
   HistoryDuration _historyDuration;
   String _pricesFiatId;
   String _holdingsFiatId;

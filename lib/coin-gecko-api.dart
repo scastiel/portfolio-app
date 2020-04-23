@@ -5,6 +5,7 @@ import 'package:portfolio/model/currencies.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'model/history-duration.dart';
+import 'model/history.dart';
 import 'model/price.dart';
 
 class BasicApi {
@@ -92,7 +93,7 @@ class CoinGeckoApi {
     );
   }
 
-  Future<Map<DateTime, double>> fetchHistoryForCurrencyAndFiat({
+  Future<Map<DateTime, History>> fetchHistoryForCurrencyAndFiat({
     String currencyId,
     String fiatId,
     HistoryDuration historyDuration,
@@ -103,11 +104,14 @@ class CoinGeckoApi {
       {'vs_currency': fiatId, 'days': getDays(historyDuration).toString()},
     );
     final result = await _api.call(uri);
+    final List volumes = result['total_volumes'];
     return result['prices'].fold(
-      <DateTime, double>{},
-      (history, values) => <DateTime, double>{
+      <DateTime, History>{},
+      (history, values) => <DateTime, History>{
         ...history,
-        DateTime.fromMillisecondsSinceEpoch(values[0]): values[1]
+        DateTime.fromMillisecondsSinceEpoch(values[0]): History(
+            price: values[1],
+            volume: volumes.firstWhere((arr) => arr[0] == values[0])[1])
       },
     );
   }

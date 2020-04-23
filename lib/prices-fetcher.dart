@@ -6,6 +6,7 @@ import 'package:portfolio/coin-gecko-api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'model/currencies.dart';
+import 'model/history.dart';
 import 'model/portfolio.dart';
 import 'model/user-preferences.dart';
 import 'model/price.dart';
@@ -14,7 +15,7 @@ abstract class PricesFetcher {
   void Function() subscribeForCurrency(
       Currency currency, void Function(Price) onUpdate);
   void Function() subscribeToHistoryForCurrency(String currencyId,
-      String fiatId, void Function(Map<DateTime, double>) onUpdate);
+      String fiatId, void Function(Map<DateTime, History>) onUpdate);
   Future<void> refresh(BuildContext context);
 }
 
@@ -167,7 +168,7 @@ class CoinGeckoPricesFetcher extends PricesFetcher {
   void Function() subscribeToHistoryForCurrency(
     String currencyId,
     String fiatId,
-    void Function(Map<DateTime, double>) onUpdate,
+    void Function(Map<DateTime, History>) onUpdate,
   ) {
     final observer = _HistoryObserver(
       currencyId: currencyId,
@@ -184,7 +185,7 @@ class CoinGeckoPricesFetcher extends PricesFetcher {
 class _HistoryObserver {
   final String currencyId;
   final String fiatId;
-  final void Function(Map<DateTime, double>) onUpdate;
+  final void Function(Map<DateTime, History>) onUpdate;
 
   _HistoryObserver({
     @required this.currencyId,

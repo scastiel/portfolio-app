@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:portfolio/model/history.dart';
 import 'package:provider/provider.dart';
 
 import '../helpers.dart';
@@ -41,7 +42,7 @@ class _Summary extends StatefulWidget {
 class _SummaryState extends State<_Summary> {
   Map<String, Price> _prices = {};
   bool _pricesFetcherInitialized = false;
-  Map<String, Map<DateTime, double>> _histories = {};
+  Map<String, Map<DateTime, History>> _histories = {};
   Set<void Function()> _unsubscribeFromHistoryForCurrencies = {};
   Set<void Function()> _unsubscribeFromCurrencies = {};
 
@@ -131,7 +132,7 @@ class _SummaryState extends State<_Summary> {
   bool get _historiesInitialized => widget.portfolio.assets
       .every((asset) => _histories.containsKey(asset.currency.id));
 
-  Map<DateTime, double> get _history {
+  Map<DateTime, History> get _history {
     if (!_historiesInitialized) {
       return null;
     }
@@ -140,14 +141,16 @@ class _SummaryState extends State<_Summary> {
 
     final prices = widget.portfolio.assets.map((asset) {
       final prices = _histories[asset.currency.id];
-      return prices.entries.map((entry) => entry.value * asset.amount).toList();
+      return prices.entries
+          .map((entry) => entry.value.price * asset.amount)
+          .toList();
     }).toList();
     final nbElements = prices.fold<int>(prices.first.length,
         (currentMin, prices) => min(prices.length, currentMin));
-    final history = <DateTime, double>{};
+    final history = <DateTime, History>{};
     for (var i = 0; i < nbElements; i++) {
-      history[dates[i]] =
-          prices.fold(0.0, (value, element) => value + element[i]);
+      history[dates[i]] = History(
+          price: prices.fold(0.0, (value, element) => value + element[i]));
     }
     return history;
   }

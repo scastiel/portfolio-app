@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:portfolio/model/history.dart';
 
 import '../model/currencies.dart';
 import 'chart/price-chart.dart';
@@ -10,7 +11,7 @@ class PriceCard extends StatefulWidget {
   final Widget title;
   final double variation;
   final String priceText;
-  final Map<DateTime, double> history;
+  final Map<DateTime, History> history;
   final String holdingText;
   final Currency currency;
   final Currency fiat;

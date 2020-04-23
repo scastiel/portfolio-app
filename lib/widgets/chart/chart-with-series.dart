@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:portfolio/model/currencies.dart';
 import 'package:portfolio/widgets/chart/selection-info.dart';
+import 'package:portfolio/widgets/chart/time-series-volume.dart';
 
 import 'time-series-price.dart';
 
@@ -16,8 +17,9 @@ charts.Color convertColor(Color color) {
 
 class ChartWithSeries extends StatefulWidget {
   final bool detailed;
-  final List<charts.Series<TimeSeriesPrice, DateTime>> seriesList;
+  final List<charts.Series> seriesList;
   final charts.NumericExtents viewport;
+  final charts.NumericExtents volumeViewport;
   final Brightness brightness;
 
   final Currency currency;
@@ -28,6 +30,7 @@ class ChartWithSeries extends StatefulWidget {
     this.detailed = false,
     @required this.seriesList,
     @required this.viewport,
+    @required this.volumeViewport,
     this.brightness = Brightness.light,
     @required this.currency,
     @required this.fiat,
@@ -40,6 +43,16 @@ class ChartWithSeries extends StatefulWidget {
   static final notDetailedSeriesRenderer = charts.LineRendererConfig<DateTime>(
     customRendererId: 'customArea',
     includeArea: true,
+    includeLine: false,
+  );
+  static final detailedBarsSeriesRenderer = charts.LineRendererConfig<DateTime>(
+    customRendererId: 'bars',
+    includeArea: true,
+    includeLine: false,
+  );
+  static final notDetailedBarsSeriesRenderer =
+      charts.LineRendererConfig<DateTime>(
+    customRendererId: 'bars',
     includeLine: false,
   );
 
@@ -81,7 +94,10 @@ class _ChartWithSeriesState extends State<ChartWithSeries> {
       customSeriesRenderers: [
         widget.detailed
             ? ChartWithSeries.detailedSeriesRenderer
-            : ChartWithSeries.notDetailedSeriesRenderer
+            : ChartWithSeries.notDetailedSeriesRenderer,
+        widget.detailed
+            ? ChartWithSeries.detailedBarsSeriesRenderer
+            : ChartWithSeries.notDetailedBarsSeriesRenderer
       ],
       layoutConfig: widget.detailed
           ? charts.LayoutConfig(
@@ -97,8 +113,10 @@ class _ChartWithSeriesState extends State<ChartWithSeries> {
               leftMarginSpec: charts.MarginSpec.fixedPixel(0),
             ),
       defaultInteractions: widget.detailed,
-      primaryMeasureAxis:
-          new charts.NumericAxisSpec(renderSpec: charts.NoneRenderSpec()),
+      primaryMeasureAxis: new charts.NumericAxisSpec(
+        renderSpec: charts.NoneRenderSpec(),
+        viewport: widget.volumeViewport,
+      ),
       secondaryMeasureAxis: new charts.NumericAxisSpec(
         tickProviderSpec:
             charts.BasicNumericTickProviderSpec(desiredTickCount: 5),
@@ -149,7 +167,8 @@ class _ChartWithSeriesState extends State<ChartWithSeries> {
                 showHorizontalFollowLine:
                     charts.LinePointHighlighterFollowLineType.none,
                 showVerticalFollowLine:
-                    charts.LinePointHighlighterFollowLineType.nearest,
+                    charts.LinePointHighlighterFollowLineType.all,
+                defaultRadiusPx: 0,
               ),
               new charts.SelectNearest(
                 eventTrigger: charts.SelectionTrigger.tapAndDrag,
@@ -161,7 +180,11 @@ class _ChartWithSeriesState extends State<ChartWithSeries> {
 
   _onSelectionChanged(charts.SelectionModel model) {
     setState(() {
-      _selectedTimeSeriesPrice = model.selectedDatum.first?.datum;
+      _selectedTimeSeriesPrice = null;
+      for (var datum in model.selectedDatum) {
+        if (datum.datum is TimeSeriesPrice)
+          _selectedTimeSeriesPrice = datum.datum;
+      }
     });
   }
 }
