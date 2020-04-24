@@ -67,6 +67,12 @@ class _EditAssetScreenState extends State<EditAssetScreen> {
     final priceFiat = currencies.getCurrency(userPreferences.pricesFiatId);
     final holdingFiat = currencies.getCurrency(userPreferences.holdingsFiatId);
 
+    RichText _richText(List<TextSpan> children) => RichText(
+          text: TextSpan(
+            style: TextStyle(color: Theme.of(context).hintColor, fontSize: 12),
+            children: children,
+          ),
+        );
     TextSpan _bold(String text) => TextSpan(
           text: text,
           style: TextStyle(fontWeight: FontWeight.bold),
@@ -99,10 +105,13 @@ class _EditAssetScreenState extends State<EditAssetScreen> {
               Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                child: Text(
-                    'You can enter the amount you own, or keep it empty if you just want to watch the price.',
-                    style: TextStyle(
-                        color: Theme.of(context).hintColor, fontSize: 13)),
+                child: _richText(
+                  [
+                    _text(
+                      'You can enter the amount you own, or keep it empty if you just want to watch the price.',
+                    ),
+                  ],
+                ),
               ),
               _EditAssetHoldings(
                 holdingsTextController: _holdingsTextController,
@@ -111,36 +120,32 @@ class _EditAssetScreenState extends State<EditAssetScreen> {
               Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                child: RichText(
-                  text: TextSpan(
-                    style: TextStyle(
-                        color: Theme.of(context).hintColor, fontSize: 13),
-                    children: [
-                      ...(holdingFiat == priceFiat
-                          ? [
-                              _text(
-                                  'The price and your holdings value will be displayed in '),
-                              _bold(holdingFiat.name),
-                              _text('.'),
-                            ]
-                          : [
-                              _text('The price will be displayed in '),
-                              _bold(priceFiat.name),
-                              _text(' and your holdings value in '),
-                              _bold(holdingFiat.name),
-                              _text('.'),
-                            ]),
-                      _newLine(),
-                      _text('Change this globally in the '),
-                      TextSpan(
-                        text: 'Settings',
-                        style: TextStyle(color: Theme.of(context).primaryColor),
-                        recognizer: TapGestureRecognizer()
-                          ..onTap = () => openSettings(context),
-                      ),
-                      _text('.'),
-                    ],
-                  ),
+                child: _richText(
+                  [
+                    ...(holdingFiat == priceFiat
+                        ? [
+                            _text(
+                                'The price and your holdings value will be displayed in '),
+                            _bold(holdingFiat.name),
+                            _text('.'),
+                          ]
+                        : [
+                            _text('The price will be displayed in '),
+                            _bold(priceFiat.name),
+                            _text(' and your holdings value in '),
+                            _bold(holdingFiat.name),
+                            _text('.'),
+                          ]),
+                    _newLine(),
+                    _text('Change this globally in the '),
+                    TextSpan(
+                      text: 'Settings',
+                      style: TextStyle(color: Theme.of(context).primaryColor),
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () => openSettings(context),
+                    ),
+                    _text('.'),
+                  ],
                 ),
               ),
             ]),
